@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StayControl - Reservas</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="../assets/css/reservas.css">
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- HEADER -->
+    <header class="header">
+        <h1>Calendario y Reservas</h1>
+
+        <button class="calendar-button">
+            <img
+                src="https://www.figma.com/api/mcp/asset/ceef4000-3084-48f5-86ee-f125e5bb21af.svg"
+                alt="Calendario"
+            >
+        </button>
+    </header>
+
+    <!-- CALENDARIO -->
+    <section class="calendar-strip">
+
+        <button class="day">
+            <span>Lun</span>
+            <strong>24</strong>
+        </button>
+
+        <button class="day">
+            <span>Mar</span>
+            <strong>25</strong>
+        </button>
+
+        <button class="day selected">
+            <span>Mié</span>
+            <strong>26</strong>
+        </button>
+
+        <button class="day">
+            <span>Jue</span>
+            <strong>27</strong>
+        </button>
+
+        <button class="day">
+            <span>Vie</span>
+            <strong>28</strong>
+        </button>
+
+        <button class="day">
+            <span>Sáb</span>
+            <strong>29</strong>
+        </button>
+
+    </section>
+
+    <!-- RESERVAS -->
+    <main class="reservations">
+
+        <h2>Lista de Próximas Reservas</h2>
+
+        <!-- RESERVA 1 -->
+        <article class="reservation-card">
+
+            <div class="reservation-top">
+
+                <div class="guest">
+                    <strong>Esteban Ramírez</strong>
+                    <span>26 Oct - 29 Oct</span>
+                </div>
+
+                <span class="status confirmed">
+                    CONFIRMADA
+                </span>
+
+            </div>
+
+            <div class="reservation-bottom">
+
+                <div class="assigned-room">
+                    <img
+                        src="https://www.figma.com/api/mcp/asset/82b076fa-88fb-40bc-aec9-1ff05065d1db.svg"
+                        alt=""
+                    >
+
+                    <span>Habitación Asignada:</span>
+                    <strong>102</strong>
+                </div>
+
+            </div>
+
+        </article>
+
+        <!-- RESERVA 2 -->
+        <article class="reservation-card">
+
+            <div class="reservation-top">
+
+                <div class="guest">
+                    <strong>Laura Martínez</strong>
+                    <span>27 Oct - 02 Nov</span>
+                </div>
+
+                <span class="status pending">
+                    PENDIENTE
+                </span>
+
+            </div>
+
+            <div class="reservation-bottom">
+
+                <div class="assigned-room">
+                    <img
+                        src="https://www.figma.com/api/mcp/asset/82b076fa-88fb-40bc-aec9-1ff05065d1db.svg"
+                        alt=""
+                    >
+
+                    <span>Habitación Asignada:</span>
+                    <strong>201</strong>
+                </div>
+
+            </div>
+
+        </article>
+
+        <!-- RESERVA 3 -->
+        <article class="reservation-card">
+
+            <div class="reservation-top">
+
+                <div class="guest">
+                    <strong>Sofía Vargas</strong>
+                    <span>25 Oct - 26 Oct</span>
+                </div>
+
+                <span class="status cancelled">
+                    CANCELADA
+                </span>
+
+            </div>
+
+            <div class="reservation-bottom">
+
+                <div class="assigned-room">
+                    <img
+                        src="https://www.figma.com/api/mcp/asset/82b076fa-88fb-40bc-aec9-1ff05065d1db.svg"
+                        alt=""
+                    >
+
+                    <span>Habitación Asignada:</span>
+                    <strong>103</strong>
+                </div>
+
+            </div>
+
+        </article>
+
+    </main>
+
+    <!-- BOTÓN FLOTANTE -->
+    <button class="fab" id="addReservation">
+        <img
+            src="https://www.figma.com/api/mcp/asset/b4dd6a50-09b2-41da-b276-15aae08aafca.svg"
+            alt="Agregar reserva"
+        >
+    </button>
+
+    <!-- NAVBAR -->
+    <nav class="bottom-nav">
+
+        <a class="nav-item">
+            <img
+                src="https://www.figma.com/api/mcp/asset/e76f3919-ff67-4044-ba88-aef073fadd7a.svg"
+                alt=""
+            >
+            <span>Inicio</span>
+        </a>
+
+        <a class="nav-item">
+            <img
+                src="https://www.figma.com/api/mcp/asset/b5a69385-e64b-4704-905c-69aee7a69206.svg"
+                alt=""
+            >
+            <span>Habitaciones</span>
+        </a>
+
+        <a class="nav-item active">
+            <img
+                src="https://www.figma.com/api/mcp/asset/9ad74f06-179e-4bd0-b022-33e33d9c3c52.svg"
+                alt=""
+            >
+            <span>Reservas</span>
+        </a>
+
+        <a class="nav-item">
+            <img
+                src="https://www.figma.com/api/mcp/asset/db55ce0b-9e44-4913-a80b-e0ebe659a0be.svg"
+                alt=""
+            >
+            <span>Finanzas</span>
+        </a>
+
+        <a class="nav-item">
+            <img
+                src="https://www.figma.com/api/mcp/asset/0cd4330f-2f02-4d3b-9925-6c0debd98ded.svg"
+                alt=""
+            >
+            <span>Limpieza</span>
+        </a>
+
+    </nav>
+
+</div>
+
+<script type="module" src="../controllers/reservasController.js"></script>
+</body>
+</html>

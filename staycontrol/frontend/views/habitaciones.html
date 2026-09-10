@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StayControl - Habitaciones</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="../assets/css/habitaciones.css">
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- HEADER -->
+    <header class="header">
+        <h1>Habitaciones</h1>
+
+        <button class="search-btn">
+            <img
+                src="https://www.figma.com/api/mcp/asset/bd72231c-fbb5-4230-9b50-52b1bb90260b.svg"
+                alt="Buscar"
+            >
+        </button>
+    </header>
+
+    <!-- FILTROS -->
+    <div class="filter-scroll">
+
+        <button class="filter active" data-filter="todas">
+            Todas
+        </button>
+
+        <button class="filter" data-filter="disponibles">
+            Disponibles
+        </button>
+
+        <button class="filter" data-filter="ocupadas">
+            Ocupadas
+        </button>
+
+        <button class="filter" data-filter="limpieza">
+            Limpieza
+        </button>
+
+    </div>
+
+    <!-- HABITACIONES -->
+    <main class="rooms-list">
+
+        <!-- 101 -->
+        <article class="room-card" data-numero="101" data-status="disponibles">
+
+            <div class="room-top">
+
+                <div class="room-info">
+                    <h2>Hab. 101</h2>
+                    <span>• Individual</span>
+                </div>
+
+                <div class="status-tag available">
+                    <img
+                        src="https://www.figma.com/api/mcp/asset/4f0463c1-1991-4763-be80-96ed19cad83a.svg"
+                        alt=""
+                    >
+                    DISPONIBLE
+                </div>
+
+            </div>
+
+            <div class="room-details">
+
+                <p>Sin huésped actual</p>
+
+                <div class="price">
+                    <strong>$25</strong>
+                    <span>/noche</span>
+                </div>
+
+            </div>
+
+        </article>
+
+        <!-- 102 -->
+        <article class="room-card" data-numero="102" data-status="ocupadas">
+
+            <div class="room-top">
+
+                <div class="room-info">
+                    <h2>Hab. 102</h2>
+                    <span>• Doble</span>
+                </div>
+
+                <div class="status-tag occupied">
+                    <img
+                        src="https://www.figma.com/api/mcp/asset/42c2eec3-1217-4d09-af5f-6845f86ea39e.svg"
+                        alt=""
+                    >
+                    OCUPADA
+                </div>
+
+            </div>
+
+            <div class="room-details">
+
+                <div class="guest">
+                    <img
+                        src="https://www.figma.com/api/mcp/asset/bfcb040c-64a9-4d5d-9704-ac9fe9c2838c.svg"
+                        alt=""
+                    >
+                    <span>Roberto García</span>
+                </div>
+
+                <div class="price">
+                    <strong>$40</strong>
+                    <span>/noche</span>
+                </div>
+
+            </div>
+
+        </article>
+
+        <!-- 103 -->
+        <article class="room-card" data-numero="103" data-status="limpieza">
+
+            <div class="room-top">
+
+                <div class="room-info">
+                    <h2>Hab. 103</h2>
+                    <span>• Suite</span>
+                </div>
+
+                <div class="status-tag cleaning">
+                    <img
+                        src="https://www.figma.com/api/mcp/asset/64b89bd8-4239-4966-811c-eea64216f27f.svg"
+                        alt=""
+                    >
+                    EN LIMPIEZA
+                </div>
+
+            </div>
+
+            <div class="room-details">
+
+                <p>Sin huésped actual</p>
+
+                <div class="price">
+                    <strong>$75</strong>
+                    <span>/noche</span>
+                </div>
+
+            </div>
+
+        </article>
+
+        <!-- 104 -->
+        <article class="room-card" data-numero="104" data-status="mantenimiento">
+
+            <div class="room-top">
+
+                <div class="room-info">
+                    <h2>Hab. 104</h2>
+                    <span>• Doble</span>
+                </div>
+
+                <div class="status-tag maintenance">
+                    <img
+                        src="https://www.figma.com/api/mcp/asset/21894552-5953-4ca2-a828-125c826be0f0.svg"
+                        alt=""
+                    >
+                    MANTENIMIENTO
+                </div>
+
+            </div>
+
+            <div class="room-details">
+
+                <p>Sin huésped actual</p>
+
+                <div class="price">
+                    <strong>$40</strong>
+                    <span>/noche</span>
+                </div>
+
+            </div>
+
+        </article>
+
+    </main>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+
+        <a class="nav-item">
+            <img
+                src="https://www.figma.com/api/mcp/asset/7813a5da-a3df-4878-ba50-36abc33a5afd.svg"
+                alt=""
+            >
+            <span>Inicio</span>
+        </a>
+
+        <a class="nav-item active">
+            <img
+                src="https://www.figma.com/api/mcp/asset/460e4984-4f91-4f52-90c0-7758e3c4e0b3.svg"
+                alt=""
+            >
+            <span>Habitaciones</span>
+        </a>
+
+        <a class="nav-item">
+            <img
+                src="https://www.figma.com/api/mcp/asset/e18e86bc-ec9b-4c29-8d7b-2186bb37ffa2.svg"
+                alt=""
+            >
+            <span>Reservas</span>
+        </a>
+
+        <a class="nav-item">
+            <img
+                src="https://www.figma.com/api/mcp/asset/89e612b4-3660-4f8a-b989-32445b4a66b1.svg"
+                alt=""
+            >
+            <span>Finanzas</span>
+        </a>
+
+        <a class="nav-item">
+            <img
+                src="https://www.figma.com/api/mcp/asset/dc39093c-0d3e-4da3-b08b-e624504f7542.svg"
+                alt=""
+            >
+            <span>Limpieza</span>
+        </a>
+
+    </nav>
+
+</div>
+
+<script type="module" src="../controllers/habitacionesController.js"></script>
+</body>
+</html>
