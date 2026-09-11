@@ -1,7 +1,7 @@
 /**
  * Capa Modelo: clases Java que representan los datos y las reglas del dominio.
  *
- * <p>Este paquete queda preparado para definir los modelos cuando se desarrollen
- * las funciones del backend. Actualmente las vistas usan datos de ejemplo.
+ * <p>Habitacion contiene los datos actuales y la creación original para idempotencia.
+ * Las vistas todavía usan datos de ejemplo; su integración con las APIs está pendiente.
  */
 package com.example.staycontrol.model;

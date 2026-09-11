@@ -11,6 +11,16 @@ public class ViewController {
         return "redirect:/views/login.html";
     }
 
+    @GetMapping({"/registro", "/registro.html", "/pages/registro.html"})
+    public String registro() {
+        return "redirect:/views/registro.html";
+    }
+
+    @GetMapping({"/recuperar-contrasena", "/recuperar-contrasena.html", "/pages/recuperar-contrasena.html"})
+    public String recuperarContrasena() {
+        return "redirect:/views/recuperar-contrasena.html";
+    }
+
     @GetMapping({"/dashboard", "/dashboard.html", "/pages/dashboard.html"})
     public String dashboard() {
         return "redirect:/views/dashboard.html";

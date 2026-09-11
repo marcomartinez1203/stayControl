@@ -43,11 +43,16 @@ test("completar y desmarcar una tarea no cambia las otras tareas", () => {
 
 test("el cliente API envía JSON y conserva las opciones de la petición", async context => {
     const fetchMock = context.mock.method(globalThis, "fetch", async (url, options) => {
+        if (url === "/api/v1/auth/csrf") {
+            return Response.json({ headerName: "X-CSRF-TOKEN", token: "prueba-csrf" });
+        }
         assert.equal(url, "/api/ejemplo");
         assert.equal(options.method, "POST");
         assert.equal(options.headers.get("Accept"), "application/json");
         assert.equal(options.headers.get("Content-Type"), "application/json");
         assert.equal(options.headers.get("X-Test"), "mvc");
+        assert.equal(options.headers.get("X-CSRF-TOKEN"), "prueba-csrf");
+        assert.equal(options.credentials, "same-origin");
         assert.deepEqual(JSON.parse(options.body), { numero: 103 });
         return new Response(JSON.stringify({ id: 1 }), {
             status: 201,
@@ -60,12 +65,14 @@ test("el cliente API envía JSON y conserva las opciones de la petición", async
         headers: { "X-Test": "mvc" },
         body: { numero: 103 }
     }), { id: 1 });
-    assert.equal(fetchMock.mock.callCount(), 1);
+    assert.equal(fetchMock.mock.callCount(), 2);
 });
 
 test("el cliente API acepta respuestas vacías y propaga los errores HTTP", async context => {
-    const fetchMock = context.mock.method(globalThis, "fetch", async () =>
-        new Response(null, { status: 204 })
+    const fetchMock = context.mock.method(globalThis, "fetch", async url =>
+        url === "/api/v1/auth/csrf"
+            ? Response.json({ headerName: "X-CSRF-TOKEN", token: "prueba-csrf" })
+            : new Response(null, { status: 204 })
     );
     assert.equal(await requestJson("/api/ejemplo", { method: "DELETE" }), null);
     fetchMock.mock.mockImplementation(async () => new Response(null, { status: 404 }));

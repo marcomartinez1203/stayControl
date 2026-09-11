@@ -32,10 +32,13 @@ staycontrol/
 │   │   ├── StaycontrolApplication.java    Arranque de Spring Boot
 │   │   ├── config/MongoConfig.java        Cliente MongoDB y verificación al arrancar
 │   │   ├── service/MongoConnectionService.java  Ping de conexión
-│   │   ├── model/                        Modelo: datos y reglas de dominio
-│   │   │   └── package-info.java
+│   │   ├── model/                        Habitacion, DatosHabitacion y EstadoHabitacion
+│   │   ├── dto/                          Cuerpos y respuestas de la API
+│   │   ├── repository/                   Persistencia de habitaciones en MongoDB
+│   │   ├── exception/                    Errores de negocio
 │   │   └── controller/                   Controlador: rutas HTTP
-│   │       └── ViewController.java
+│   │       ├── ViewController.java
+│   │       └── api/                      API REST y manejo de errores
 │   └── resources/
 │       └── application.properties        Configuración
 ├── src/test/java/com/example/staycontrol/ Pruebas del backend
@@ -52,20 +55,71 @@ Estos servicios trabajan en memoria. Los controladores inicializan sus modelos
 con los datos de ejemplo presentes en el HTML, sin duplicar esas listas en otro
 archivo. Al recargar se restaura el estado de ejemplo.
 
-`apiService.js` centraliza futuras peticiones JSON a Spring Boot mediante
-`requestJson(url, opciones)`. Está preparado, pero todavía no se invoca porque
-las rutas de datos del backend están pendientes. Los servicios podrán usarlo
-cuando existan esas rutas. El login aún no autentica usuarios.
+`apiService.js` centraliza peticiones JSON con cookies y CSRF mediante
+`requestJson(url, opciones)`. `authService.js` ya conecta el login con Spring Boot.
+Las demás vistas aún usan datos de ejemplo y no consumen sus APIs de negocio.
 
-En Java, `model/` sigue preparado para definir los modelos del backend.
-`controller/ViewController.java` contiene los mappings de Spring MVC y redirige
-cada ruta a su HTML. `MongoConfig` administra el cliente MongoDB y Spring Data
-proporciona `MongoTemplate` para las futuras operaciones. Las entidades,
-repositorios, servicios de negocio y controladores de datos siguen pendientes.
+En Java, `controller/ViewController.java` contiene los mappings de las vistas.
+La primera API de negocio está en `controller/api/HabitacionController.java`, con
+modelos, DTOs, servicio y repositorio propios. `MongoConfig` administra el cliente
+MongoDB y las operaciones se realizan con `MongoTemplate`.
+
+## Primera API: habitaciones
+
+Disponible en `/api/v1/habitaciones`: GET de listado/detalle, POST con
+`Idempotency-Key`, PUT y DELETE lógico. Los reintentos de creación se resuelven
+de forma persistente en MongoDB, incluyendo peticiones concurrentes.
+
+Consulta el [contrato, ejemplos y límites de idempotencia](docs/api-habitaciones.md).
+Las seis APIs están implementadas; falta conectar las vistas de negocio.
+Las APIs requieren una sesión ADMIN; las escrituras también CSRF.
+El servidor sigue escuchando en `127.0.0.1` por defecto para desarrollo local.
+
+## API de autenticación
+
+`/api/v1/auth`: GET `/csrf`, POST `/login`, GET `/me` y POST `/logout`.
+Usa Spring Security, contraseñas con hash PBKDF2, cookies HttpOnly, rotación de
+sesión y límite de intentos. POST `/api/v1/auth/registro` crea cuentas USER con CSRF
+e `Idempotency-Key`, sin acceso a las APIs de negocio ADMIN. No hay credenciales
+predeterminadas. Consulta el [contrato de registro](docs/api-registro.md).
+
+Para crear el operador inicial configura `AUTH_BOOTSTRAP_ENABLED=true`,
+`AUTH_ADMIN_EMAIL` y `AUTH_ADMIN_PASSWORD` en `.env`. Reinicia, luego desactiva el
+aprovisionamiento y retira la contraseña de `.env`. Los reinicios no duplican
+usuarios ni sobrescriben contraseñas. No se creó ninguna cuenta real en las pruebas.
+Consulta [configuración, endpoints y límites](docs/api-autenticacion.md).
+
+## API de reservas
+
+La API de reservas está disponible en `/api/v1/reservas`, con listado, consulta,
+creación idempotente, cancelación y finalización. Usa transacciones MongoDB para
+evitar reservas solapadas y proteger las habitaciones con reservas confirmadas.
+Consulta el [contrato de reservas](docs/api-reservas.md). Su vista aún no consume la API.
+
+## API de limpieza
+
+Disponible en `/api/v1/limpieza`: listado, detalle, creación idempotente, cambios
+de estado y cancelación lógica. Conserva el historial y protege de borrado las
+habitaciones con tareas abiertas. La vista todavía no consume estos endpoints.
+Consulta el [contrato de limpieza](docs/api-limpieza.md).
+
+## API de finanzas
+
+La API de finanzas está disponible en `/api/v1/finanzas`: ingresos/egresos manuales,
+creación idempotente, anulación con auditoría y resumen por moneda. No procesa pagos
+ni genera movimientos desde reservas. Consulta el [contrato de finanzas](docs/api-finanzas.md).
+
+## API de dashboard
+
+`GET /api/v1/dashboard?moneda=COP` reúne el estado actual de habitaciones,
+reservas del día, tareas de limpieza abiertas y finanzas del mes por moneda.
+Acepta `fecha=AAAA-MM-DD` y `limiteReservas=5` (entre 1 y 20).
+Es de solo lectura y no requiere `Idempotency-Key`. La vista aún usa datos de ejemplo.
+Consulta el [contrato y alcance de las métricas](docs/api-dashboard.md).
 
 ## Conexión a MongoDB Atlas
 
-La conexión corresponde al clúster `staycontrol.hxq6tmx.mongodb.net` y al usuario
+La conexión de la plantilla corresponde al clúster `cluster0.58hqxmt.mongodb.net` y al usuario
 `marcomartinezmalagon1203_db_user` de la URI proporcionada. Se eligió `staycontrol`
 como nombre de base; cámbialo en `MONGODB_DATABASE` si necesitas otro nombre.
 
@@ -83,8 +137,10 @@ también acepta las variables de entorno `MONGODB_URI` y `MONGODB_DATABASE`.
 El archivo local está excluido de Git y no se empaqueta dentro del JAR ni del
 frontend. La conexión se realiza únicamente desde Java.
 
-El cliente compartido usa Stable API V1 y Spring lo cierra al detener la
-aplicación. `MongoConnectionService` envía `ping` a la base configurada durante
+El cliente compartido usa Stable API V1, lectura del primario y confirmación
+`majority`; Spring lo cierra al detener la aplicación. Antes de aceptar HTTP se
+prepara el índice único de número de habitación; se requieren permisos para crear
+índices y escribir. `MongoConnectionService` envía `ping` a la base configurada durante
 el arranque. Si la respuesta es correcta, la consola mostrará:
 
 ```text
@@ -95,7 +151,7 @@ Si falta la contraseña o falla el ping, el inicio se interrumpe con un mensaje
 de configuración o conexión. No se sustituye Atlas por una base local. El ping
 no crea colecciones ni datos y no comprueba permisos de escritura.
 
-Las pruebas automatizadas usan un cliente simulado y desactivan únicamente el
+Las pruebas automatizadas usan cliente/repositorio simulados y desactivan el
 ping de arranque con `app.mongodb.verify-on-startup=false`. No acceden a Atlas:
 que esas pruebas pasen no confirma una conexión real al clúster. Con la URI de
 ejemplo todavía falta reemplazar `<db_password>` antes de iniciar la aplicación.

@@ -4,6 +4,9 @@ import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.ServerApi;
 import com.mongodb.ServerApiVersion;
+import com.mongodb.WriteConcern;
+import com.mongodb.ReadConcern;
+import com.mongodb.ReadPreference;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.example.staycontrol.service.MongoConnectionService;
@@ -37,6 +40,9 @@ public class MongoConfig {
 
         MongoClientSettings settings = MongoClientSettings.builder()
             .applyConnectionString(connectionString)
+            .writeConcern(WriteConcern.MAJORITY.withWTimeout(5, TimeUnit.SECONDS))
+            .readConcern(ReadConcern.MAJORITY)
+            .readPreference(ReadPreference.primary())
             .serverApi(ServerApi.builder().version(ServerApiVersion.V1).build())
             .applyToClusterSettings(builder -> builder.serverSelectionTimeout(5, TimeUnit.SECONDS))
             .applyToSocketSettings(builder -> builder

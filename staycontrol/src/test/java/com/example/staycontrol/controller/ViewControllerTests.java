@@ -1,6 +1,7 @@
 package com.example.staycontrol.controller;
 
 import com.mongodb.client.MongoClient;
+import com.example.staycontrol.repository.HabitacionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -17,18 +18,23 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 // Verifica las vistas empaquetadas sin depender de file:./frontend/.
 @SpringBootTest(properties = {
     "spring.web.resources.static-locations=classpath:/static/",
     "spring.mongodb.uri=mongodb://127.0.0.1:27017/staycontrol_test",
     "spring.mongodb.database=staycontrol_test",
-    "app.mongodb.verify-on-startup=false"
+    "app.mongodb.verify-on-startup=false",
+    "app.auth.bootstrap.enabled=false"
 })
 class ViewControllerTests {
 
     @MockitoBean
     private MongoClient mongoClient;
+
+    @MockitoBean
+    private HabitacionRepository habitacionRepository;
 
     @Autowired
     private WebApplicationContext context;
@@ -37,7 +43,7 @@ class ViewControllerTests {
 
     @BeforeEach
     void setUp() {
-        mvc = MockMvcBuilders.webAppContextSetup(context).build();
+        mvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
     }
 
     @ParameterizedTest
