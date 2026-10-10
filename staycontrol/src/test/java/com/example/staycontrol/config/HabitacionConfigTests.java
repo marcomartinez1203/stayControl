@@ -2,23 +2,24 @@ package com.example.staycontrol.config;
 
 import com.example.staycontrol.repository.HabitacionRepository;
 import org.junit.jupiter.api.Test;
-import org.springframework.dao.DataAccessResourceFailureException;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 class HabitacionConfigTests {
     @Test
-    void preparaIndicesDuranteLaInicializacion() throws Exception {
+    void iniciaSinPrepararIndicesDeUnHotelSinSesion() {
         var repository = mock(HabitacionRepository.class);
-        new HabitacionConfig().prepararHabitaciones(repository).afterPropertiesSet();
-        verify(repository).prepararIndices();
-    }
+        try (var context = new AnnotationConfigApplicationContext()) {
+            context.registerBean(HabitacionRepository.class, () -> repository);
+            context.register(HabitacionConfig.class);
+            context.refresh();
 
-    @Test
-    void noSilenciaElFalloAlCrearElIndice() {
-        var repository = mock(HabitacionRepository.class);
-        doThrow(new DataAccessResourceFailureException("sin permisos")).when(repository).prepararIndices();
-        var inicializador = new HabitacionConfig().prepararHabitaciones(repository);
-        assertThrows(DataAccessResourceFailureException.class, inicializador::afterPropertiesSet);
+            assertNotNull(context.getBean(HabitacionConfig.class));
+            // Los índices se crean al escribir en el hotel autenticado, no al arrancar.
+            verifyNoInteractions(repository);
+        }
     }
 }

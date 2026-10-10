@@ -1,8 +1,8 @@
 # API de finanzas
 
-Base `/api/v1/finanzas`. Requiere sesión ADMIN y CSRF en escrituras.
+Base `/api/v1/finanzas`. Requiere sesión autenticada del hotel y CSRF en escrituras.
 Registro manual de ingresos/egresos: no procesa pagos, facturas, impuestos ni
-contabilidad oficial. La vista existente todavía no consume esta API.
+contabilidad oficial. La vista consume esta API para movimientos y resumen por moneda.
 
 | Método | Ruta | Resultado |
 | --- | --- | --- |
@@ -79,6 +79,21 @@ movimientos}`; balance = ingresos − egresos. Sin datos devuelve ceros.
 La suma se realiza en MongoDB, sin cargar todos los movimientos en Java ni mezclar
 monedas. No hay conversiones de divisa, saldo inicial ni proyección de reservas.
 Es un resumen operativo de los registros y filtros, no una certificación contable.
+
+En la vista Finanzas, «Gestionar / actualizar» permite aplicar moneda, estado y
+fechas inclusivas; también ofrece «Este mes» y «Todas las fechas». Las fechas
+se aplican tanto al listado como al balance. Cambiar de pestaña o página conserva
+los filtros aplicados, sin tomar campos editados pendientes de «Actualizar».
+El balance siempre suma ingresos y egresos REGISTRADO, incluso si el listado
+muestra solo anulados o una sola pestaña. La descarga JSON contiene exactamente
+el resumen mostrado y su período; permanece deshabilitada durante la carga o si
+falla el resumen, sin exportar datos anteriores.
+
+La gráfica muestra como máximo seis meses hasta el mes de «Hasta», recortando
+cada consulta al período elegido. Sin «Hasta», termina en el mes actual del
+dispositivo (o el mes de «Desde» si es futuro). No representa todo un período
+de más de seis meses; el balance y la descarga sí. Los meses fuera del período
+se marcan con un guion y no se consultan.
 
 El índice de periodo se prepara antes de la primera creación. No se escriben
 registros automáticamente desde reservas. Las operaciones se limitan a la colección

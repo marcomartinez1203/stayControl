@@ -71,6 +71,19 @@ body {
     font-weight: 700;
 }
 
+#nombreHotelDashboard {
+    overflow-wrap: anywhere;
+}
+
+.header > div:first-child {
+    min-width: 0;
+}
+
+.header .api-menu {
+    flex-shrink: 0;
+    margin-left: 12px;
+}
+
 .avatar {
     width: 44px;
     height: 44px;

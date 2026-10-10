@@ -20,14 +20,15 @@ import java.util.Optional;
 @Repository
 public class FinanzasRepository {
     private final MongoTemplate mongo;
-    private boolean indicesListos;
+    private final java.util.Set<String> indicesListos = new java.util.HashSet<>();
     public FinanzasRepository(MongoTemplate mongo) { this.mongo = mongo; }
 
     public synchronized void prepararIndices() {
-        if (indicesListos) { return; }
+        String coleccion = mongo.getCollectionName(MovimientoFinanciero.class);
+        if (indicesListos.contains(coleccion)) { return; }
         mongo.indexOps(MovimientoFinanciero.class).createIndex(new Index().on("datos.moneda", Sort.Direction.ASC)
             .on("estado", Sort.Direction.ASC).on("datos.fecha", Sort.Direction.ASC).named("ix_finanzas_periodo"));
-        indicesListos = true;
+        indicesListos.add(coleccion);
     }
     public Optional<MovimientoFinanciero> buscar(String id) {
         return Optional.ofNullable(mongo.findById(id, MovimientoFinanciero.class));

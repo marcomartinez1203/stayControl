@@ -48,6 +48,16 @@
     transform: none;
 }
 
+.registro .view-notice[data-estado="error"] {
+    color: #991b1b;
+    border-color: #fca5a5;
+}
+
+.registro .view-notice[data-estado="exito"] {
+    color: #166534;
+    border-color: #86efac;
+}
+
 .registro .register-footer {
     flex-wrap: wrap;
 }

@@ -21,11 +21,20 @@ import java.util.concurrent.TimeUnit;
 @Configuration(proxyBeanMethods = false)
 public class MongoConfig {
 
+    @Bean
+    public org.springframework.data.mongodb.core.MongoTemplate mongoTemplate(
+        org.springframework.data.mongodb.MongoDatabaseFactory factory,
+        org.springframework.data.mongodb.core.convert.MongoConverter converter,
+        @Value("${app.hotel.legacy-owner-email:}") String propietarioHistorico) {
+        // Comparte exactamente la misma factory que el gestor de transacciones.
+        return new HotelMongoTemplate(factory, converter, propietarioHistorico);
+    }
+
     @Bean(destroyMethod = "close")
     public MongoClient mongoClient(@Value("${spring.mongodb.uri}") String uri) {
         if (uri == null || uri.isBlank() || uri.contains("<db_password>")) {
             throw new IllegalStateException(
-                "Completa MONGODB_URI en .env con la contraseña de MongoDB Atlas."
+                "Completa MONGODB_URI en .env con la conexión a MongoDB local o Atlas."
             );
         }
 

@@ -68,13 +68,53 @@ public class ReservaService {
 
     public ReservaResponse obtener(String id) { return respuesta(buscar(id)); }
 
+    /** Consulta orientativa: no escribe contadores, índices ni reservas. */
+    public DisponibilidadResponse disponibilidad(String habitacionId, Integer personas, LocalDate entrada, LocalDate salida) {
+        ReservaRequest.validarEstancia(habitacionId, personas, entrada, salida);
+        var habitacion = repository.consultarHabitacion(habitacionId).orElseThrow(() ->
+            new ApiException(HttpStatus.NOT_FOUND, "HABITACION_NO_ENCONTRADA", "Habitación no encontrada."));
+        String motivo = null;
+        if (habitacion.datos().estado() == EstadoHabitacion.MANTENIMIENTO) {
+            motivo = "La habitación está en mantenimiento.";
+        } else if (personas > habitacion.datos().capacidad()) {
+            motivo = "Las personas superan la capacidad de la habitación.";
+        } else if (repository.hayCruce(habitacionId, entrada.toString(), salida.toString())) {
+            motivo = "Ya existe una reserva confirmada en esas fechas.";
+        }
+        long noches = ChronoUnit.DAYS.between(entrada, salida);
+        BigDecimal precio = habitacion.datos().precioNoche();
+        return new DisponibilidadResponse(habitacionId, habitacion.datos().numero(), entrada, salida,
+            personas, noches, motivo == null, motivo, precio, precio.multiply(BigDecimal.valueOf(noches)).setScale(2));
+    }
+
     public PaginaResponse<ReservaResponse> listar(EstadoReserva estado, String habitacionId, int pagina, int tamano) {
+        return listar(estado, habitacionId, pagina, tamano, null);
+    }
+
+    public PaginaResponse<ReservaResponse> listar(EstadoReserva estado, String habitacionId, int pagina, int tamano, LocalDate fecha) {
+        return listar(estado, habitacionId, pagina, tamano, fecha, null);
+    }
+
+    public PaginaResponse<ReservaResponse> listar(EstadoReserva estado, String habitacionId, int pagina, int tamano,
+        LocalDate fecha, String buscar) {
+        String texto = buscar == null ? "" : buscar.strip();
+        if (texto.length() > 120 || texto.codePoints().anyMatch(Character::isISOControl)) {
+            throw ApiException.invalida("buscar admite hasta 120 caracteres sin controles.");
+        }
         if (habitacionId != null) { validarId(habitacionId); }
+        if (fecha != null && (fecha.getYear() < 2000 || fecha.getYear() > 2100)) {
+            throw ApiException.invalida("fecha debe estar entre 2000 y 2100.");
+        }
         if (pagina < 0 || pagina > 10000 || tamano < 1 || tamano > 100) {
             throw ApiException.invalida("pagina debe estar entre 0 y 10000; tamano, entre 1 y 100.");
         }
-        return new PaginaResponse<>(repository.listar(estado, habitacionId, pagina, tamano).stream()
-            .map(this::respuesta).toList(), pagina, tamano, repository.contar(estado, habitacionId));
+        String dia = fecha == null ? null : fecha.toString();
+        if (!texto.isEmpty()) {
+            return new PaginaResponse<>(repository.listar(estado, habitacionId, pagina, tamano, dia, texto).stream()
+                .map(this::respuesta).toList(), pagina, tamano, repository.contar(estado, habitacionId, dia, texto));
+        }
+        return new PaginaResponse<>(repository.listar(estado, habitacionId, pagina, tamano, dia).stream()
+            .map(this::respuesta).toList(), pagina, tamano, repository.contar(estado, habitacionId, dia));
     }
 
     public ReservaResponse cambiarEstado(String id, EstadoReserva estado) {

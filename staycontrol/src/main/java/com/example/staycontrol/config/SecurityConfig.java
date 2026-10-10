@@ -57,7 +57,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/logout", "/api/v1/auth/registro").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/auth/me").authenticated()
-                .requestMatchers("/api/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/auth/me/hotel").authenticated()
+                // Cada cuenta administra exclusivamente sus colecciones de hotel.
+                .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll())
             .securityContext(context -> context.securityContextRepository(contexts))
             .csrf(config -> config.csrfTokenRepository(csrf))

@@ -2,7 +2,7 @@
 
 `GET /api/v1/dashboard?moneda=COP`
 
-Requiere sesión ADMIN mediante la [API de autenticación](api-autenticacion.md).
+Requiere sesión autenticada del hotel mediante la [API de autenticación](api-autenticacion.md).
 No requiere CSRF ni `Idempotency-Key`: es una consulta sin escrituras, creación
 de índices ni resúmenes persistentes. Repetirla no cambia los datos; la respuesta
 puede variar si otros usuarios modifican los registros.
@@ -54,6 +54,6 @@ Esta consulta no cambia estados de habitaciones, reservas ni tareas.
 Parámetros ausentes o inválidos: 400. Sin sesión: 401. Sin autorización: 403.
 Fallos de acceso a MongoDB: 503, sin exponer credenciales ni detalles de conexión.
 
-La vista frontend sigue usando datos de ejemplo. Implementación verificada por
+La vista frontend consume esta API. Implementación backend verificada por
 compilación; no se añadieron ni ejecutaron pruebas automatizadas ni se verificó
 este endpoint contra Atlas.

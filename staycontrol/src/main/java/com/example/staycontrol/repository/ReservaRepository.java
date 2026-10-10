@@ -12,24 +12,31 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Repository
 public class ReservaRepository {
     private final MongoTemplate mongo;
-    private boolean indicesListos;
+    private final java.util.Set<String> indicesListos = new java.util.HashSet<>();
     public ReservaRepository(MongoTemplate mongo) { this.mongo = mongo; }
 
     /** Se llama antes de la primera transacción, nunca dentro de ella. */
     public synchronized void prepararIndices() {
-        if (indicesListos) { return; }
+        String coleccion = mongo.getCollectionName(Reserva.class);
+        if (indicesListos.contains(coleccion)) { return; }
         mongo.indexOps(Reserva.class).createIndex(new Index().on("datos.habitacionId", Sort.Direction.ASC)
             .on("estado", Sort.Direction.ASC).on("datos.fechaEntrada", Sort.Direction.ASC)
             .on("datos.fechaSalida", Sort.Direction.ASC).named("ix_reservas_disponibilidad"));
-        indicesListos = true;
+        indicesListos.add(coleccion);
     }
 
     public Optional<Reserva> buscar(String id) { return Optional.ofNullable(mongo.findById(id, Reserva.class)); }
     public Reserva insertar(Reserva reserva) { return mongo.insert(reserva); }
+
+    public Optional<Habitacion> consultarHabitacion(String id) {
+        return Optional.ofNullable(mongo.findOne(
+            Query.query(Criteria.where("_id").is(id).and("eliminada").is(false)), Habitacion.class));
+    }
 
     public Optional<Habitacion> bloquearHabitacion(String id) {
         // Una escritura real sobre el mismo documento serializa reservas de esa habitación.
@@ -39,10 +46,14 @@ public class ReservaRepository {
     }
 
     public boolean hayCruce(DatosReserva datos) {
-        return mongo.exists(Query.query(Criteria.where("datos.habitacionId").is(datos.habitacionId())
+        return hayCruce(datos.habitacionId(), datos.fechaEntrada(), datos.fechaSalida());
+    }
+
+    public boolean hayCruce(String habitacionId, String fechaEntrada, String fechaSalida) {
+        return mongo.exists(Query.query(Criteria.where("datos.habitacionId").is(habitacionId)
             .and("estado").is(EstadoReserva.CONFIRMADA)
-            .and("datos.fechaEntrada").lt(datos.fechaSalida())
-            .and("datos.fechaSalida").gt(datos.fechaEntrada())), Reserva.class);
+            .and("datos.fechaEntrada").lt(fechaSalida)
+            .and("datos.fechaSalida").gt(fechaEntrada)), Reserva.class);
     }
 
     public Reserva cerrar(Reserva reserva, EstadoReserva estado) {
@@ -59,18 +70,41 @@ public class ReservaRepository {
     }
 
     public List<Reserva> listar(EstadoReserva estado, String habitacionId, int pagina, int tamano) {
-        return mongo.find(filtro(estado, habitacionId).with(Sort.by("datos.fechaEntrada", "id"))
+        return listar(estado, habitacionId, pagina, tamano, null);
+    }
+
+    public List<Reserva> listar(EstadoReserva estado, String habitacionId, int pagina, int tamano, String fecha) {
+        return listar(estado, habitacionId, pagina, tamano, fecha, null);
+    }
+
+    public List<Reserva> listar(EstadoReserva estado, String habitacionId, int pagina, int tamano, String fecha, String buscar) {
+        return mongo.find(filtro(estado, habitacionId, fecha, buscar).with(Sort.by("datos.fechaEntrada", "id"))
             .skip((long) pagina * tamano).limit(tamano), Reserva.class);
     }
 
     public long contar(EstadoReserva estado, String habitacionId) {
-        return mongo.count(filtro(estado, habitacionId), Reserva.class);
+        return contar(estado, habitacionId, null);
     }
 
-    private Query filtro(EstadoReserva estado, String habitacionId) {
+    public long contar(EstadoReserva estado, String habitacionId, String fecha) {
+        return contar(estado, habitacionId, fecha, null);
+    }
+
+    public long contar(EstadoReserva estado, String habitacionId, String fecha, String buscar) {
+        return mongo.count(filtro(estado, habitacionId, fecha, buscar), Reserva.class);
+    }
+
+    private Query filtro(EstadoReserva estado, String habitacionId, String fecha, String buscar) {
         Query query = new Query();
+        if (buscar != null && !buscar.isEmpty()) {
+            query.addCriteria(Criteria.where("datos.huesped").regex(Pattern.quote(buscar), "i"));
+        }
         if (estado != null) { query.addCriteria(Criteria.where("estado").is(estado)); }
         if (habitacionId != null) { query.addCriteria(Criteria.where("datos.habitacionId").is(habitacionId)); }
+        if (fecha != null) {
+            query.addCriteria(Criteria.where("datos.fechaEntrada").lte(fecha));
+            query.addCriteria(Criteria.where("datos.fechaSalida").gt(fecha));
+        }
         return query;
     }
 }

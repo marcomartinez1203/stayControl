@@ -1,215 +1,120 @@
 # StayControl
 
-El proyecto activo es esta carpeta: contiene `pom.xml`, `frontend/` y `src/`.
-En VS Code se ejecuta la clase `com.example.staycontrol.StaycontrolApplication`
-del proyecto Maven `staycontrol`.
+Aplicación de gestión hotelera con frontend HTML/CSS/JavaScript y backend Java 21
+con Spring Boot y MongoDB. El proyecto activo es esta carpeta, no el `pom.xml`
+del directorio superior.
 
-## Organización MVC y servicios
+## Funcionalidad implementada
 
-```text
-staycontrol/
-├── frontend/
-│   ├── models/                           Datos y estado del frontend
-│   │   ├── Habitacion.js
-│   │   └── TareaLimpieza.js
-│   ├── views/                            Los seis archivos HTML
-│   ├── controllers/                      Eventos y actualización de las vistas
-│   │   ├── loginController.js
-│   │   ├── dashboardController.js
-│   │   ├── habitacionesController.js
-│   │   ├── reservasController.js
-│   │   ├── finanzasController.js
-│   │   └── limpiezaController.js
-│   ├── services/                         Operaciones y comunicación HTTP
-│   │   ├── habitacionesService.js
-│   │   ├── limpiezaService.js
-│   │   └── apiService.js
-│   ├── assets/css/                       Estilos por vista
-│   ├── tests/                            Pruebas del frontend
-│   └── package.json                      Módulos JavaScript y comando de pruebas
-├── src/main/
-│   ├── java/com/example/staycontrol/
-│   │   ├── StaycontrolApplication.java    Arranque de Spring Boot
-│   │   ├── config/MongoConfig.java        Cliente MongoDB y verificación al arrancar
-│   │   ├── service/MongoConnectionService.java  Ping de conexión
-│   │   ├── model/                        Habitacion, DatosHabitacion y EstadoHabitacion
-│   │   ├── dto/                          Cuerpos y respuestas de la API
-│   │   ├── repository/                   Persistencia de habitaciones en MongoDB
-│   │   ├── exception/                    Errores de negocio
-│   │   └── controller/                   Controlador: rutas HTTP
-│   │       ├── ViewController.java
-│   │       └── api/                      API REST y manejo de errores
-│   └── resources/
-│       └── application.properties        Configuración
-├── src/test/java/com/example/staycontrol/ Pruebas del backend
-└── pom.xml                               Dependencias y compilación
-```
+- Registro con nombre del hotel, login, logout y edición del nombre del hotel.
+- Cada cuenta administra su propio hotel con colecciones de negocio aisladas.
+- Habitaciones: búsqueda, estados, edición, baja lógica e historial por habitación.
+- Habitaciones funciona como [SPA de alcance local](docs/habitaciones-spa.md): listado,
+  creación y edición sin recargar. Los demás módulos conservan navegación multipágina.
+- Reservas: búsqueda por huésped, calendario, consulta de disponibilidad/cotización,
+  creación idempotente, cancelación y finalización.
+- Limpieza: agenda por fecha/estado, tareas vencidas, creación, inicio, finalización
+  y cancelación.
+- Finanzas: movimientos manuales, filtros por moneda/fecha/estado, anulación
+  con motivo, balance, gráfica y descarga JSON.
+- Dashboard: métricas reales de habitaciones, reservas, limpieza y finanzas.
+- Protección de formularios pendientes y reintentos con la misma clave de creación.
 
-En el frontend, **models** representa los datos y su estado, **views** contiene
-el HTML y **controllers** conecta los eventos del usuario con los servicios y
-actualiza el DOM. Los controladores se cargan como módulos JavaScript.
+Se conserva el diseño original y los iconos SVG locales. No se ha añadido Android,
+iOS ni un empaquetador nativo. El frontend necesita servirse por HTTP/HTTPS desde
+Spring Boot; no funciona abriendo directamente el HTML como archivo.
 
-**services** contiene las operaciones sobre los modelos: `HabitacionesService`
-filtra las habitaciones y `LimpiezaService` cambia el estado de las tareas.
-Estos servicios trabajan en memoria. Los controladores inicializan sus modelos
-con los datos de ejemplo presentes en el HTML, sin duplicar esas listas en otro
-archivo. Al recargar se restaura el estado de ejemplo.
-
-`apiService.js` centraliza peticiones JSON con cookies y CSRF mediante
-`requestJson(url, opciones)`. `authService.js` ya conecta el login con Spring Boot.
-Las demás vistas aún usan datos de ejemplo y no consumen sus APIs de negocio.
-
-En Java, `controller/ViewController.java` contiene los mappings de las vistas.
-La primera API de negocio está en `controller/api/HabitacionController.java`, con
-modelos, DTOs, servicio y repositorio propios. `MongoConfig` administra el cliente
-MongoDB y las operaciones se realizan con `MongoTemplate`.
-
-## Primera API: habitaciones
-
-Disponible en `/api/v1/habitaciones`: GET de listado/detalle, POST con
-`Idempotency-Key`, PUT y DELETE lógico. Los reintentos de creación se resuelven
-de forma persistente en MongoDB, incluyendo peticiones concurrentes.
-
-Consulta el [contrato, ejemplos y límites de idempotencia](docs/api-habitaciones.md).
-Las seis APIs están implementadas; falta conectar las vistas de negocio.
-Las APIs requieren una sesión ADMIN; las escrituras también CSRF.
-El servidor sigue escuchando en `127.0.0.1` por defecto para desarrollo local.
-
-## API de autenticación
-
-`/api/v1/auth`: GET `/csrf`, POST `/login`, GET `/me` y POST `/logout`.
-Usa Spring Security, contraseñas con hash PBKDF2, cookies HttpOnly, rotación de
-sesión y límite de intentos. POST `/api/v1/auth/registro` crea cuentas USER con CSRF
-e `Idempotency-Key`, sin acceso a las APIs de negocio ADMIN. No hay credenciales
-predeterminadas. Consulta el [contrato de registro](docs/api-registro.md).
-
-Para crear el operador inicial configura `AUTH_BOOTSTRAP_ENABLED=true`,
-`AUTH_ADMIN_EMAIL` y `AUTH_ADMIN_PASSWORD` en `.env`. Reinicia, luego desactiva el
-aprovisionamiento y retira la contraseña de `.env`. Los reinicios no duplican
-usuarios ni sobrescriben contraseñas. No se creó ninguna cuenta real en las pruebas.
-Consulta [configuración, endpoints y límites](docs/api-autenticacion.md).
-
-## API de reservas
-
-La API de reservas está disponible en `/api/v1/reservas`, con listado, consulta,
-creación idempotente, cancelación y finalización. Usa transacciones MongoDB para
-evitar reservas solapadas y proteger las habitaciones con reservas confirmadas.
-Consulta el [contrato de reservas](docs/api-reservas.md). Su vista aún no consume la API.
-
-## API de limpieza
-
-Disponible en `/api/v1/limpieza`: listado, detalle, creación idempotente, cambios
-de estado y cancelación lógica. Conserva el historial y protege de borrado las
-habitaciones con tareas abiertas. La vista todavía no consume estos endpoints.
-Consulta el [contrato de limpieza](docs/api-limpieza.md).
-
-## API de finanzas
-
-La API de finanzas está disponible en `/api/v1/finanzas`: ingresos/egresos manuales,
-creación idempotente, anulación con auditoría y resumen por moneda. No procesa pagos
-ni genera movimientos desde reservas. Consulta el [contrato de finanzas](docs/api-finanzas.md).
-
-## API de dashboard
-
-`GET /api/v1/dashboard?moneda=COP` reúne el estado actual de habitaciones,
-reservas del día, tareas de limpieza abiertas y finanzas del mes por moneda.
-Acepta `fecha=AAAA-MM-DD` y `limiteReservas=5` (entre 1 y 20).
-Es de solo lectura y no requiere `Idempotency-Key`. La vista aún usa datos de ejemplo.
-Consulta el [contrato y alcance de las métricas](docs/api-dashboard.md).
-
-## Conexión a MongoDB Atlas
-
-La conexión de la plantilla corresponde al clúster `cluster0.58hqxmt.mongodb.net` y al usuario
-`marcomartinezmalagon1203_db_user` de la URI proporcionada. Se eligió `staycontrol`
-como nombre de base; cámbialo en `MONGODB_DATABASE` si necesitas otro nombre.
-
-1. Abre el archivo `.env` de la raíz del workspace, un nivel por encima de esta
-   carpeta. También puedes copiar allí `.env.example` si no existe.
-2. Sustituye `<db_password>` en `MONGODB_URI` por la contraseña del usuario de
-   base de datos de Atlas. La contraseña de esa URI debe estar codificada para
-   URL: por ejemplo, `@` se escribe `%40`. No añadas comillas alrededor del valor.
-3. En Atlas, comprueba que tu IP esté autorizada en **Network Access** y que el
-   usuario tenga los permisos necesarios sobre la base seleccionada.
-4. Reinicia el proyecto `staycontrol` desde Spring Boot Dashboard.
-
-La aplicación importa `.env` desde la carpeta de ejecución o su carpeta superior;
-también acepta las variables de entorno `MONGODB_URI` y `MONGODB_DATABASE`.
-El archivo local está excluido de Git y no se empaqueta dentro del JAR ni del
-frontend. La conexión se realiza únicamente desde Java.
-
-El cliente compartido usa Stable API V1, lectura del primario y confirmación
-`majority`; Spring lo cierra al detener la aplicación. Antes de aceptar HTTP se
-prepara el índice único de número de habitación; se requieren permisos para crear
-índices y escribir. `MongoConnectionService` envía `ping` a la base configurada durante
-el arranque. Si la respuesta es correcta, la consola mostrará:
+## Estructura
 
 ```text
-Conexión a MongoDB verificada correctamente (ping OK).
+frontend/
+  views/          Pantallas
+  controllers/    Interacción, formularios, navegación y renderizado
+  services/       Cliente HTTP, sesión, CSRF y APIs
+  assets/         CSS e iconos
+  models/         Modelos anteriores; no sustituyen los datos del servidor
+src/main/java/com/example/staycontrol/
+  controller/api/ Endpoints REST
+  controller/     Rutas de las vistas
+  service/        Validación y reglas de negocio
+  repository/     Persistencia
+  model/          Documentos de MongoDB
+  dto/            Contratos JSON
+  config/         Seguridad, MongoDB, aislamiento y transacciones
+docs/             Contratos y límites de la implementación
 ```
 
-Si falta la contraseña o falla el ping, el inicio se interrumpe con un mensaje
-de configuración o conexión. No se sustituye Atlas por una base local. El ping
-no crea colecciones ni datos y no comprueba permisos de escritura.
+## Ejecutar
 
-Las pruebas automatizadas usan cliente/repositorio simulados y desactivan el
-ping de arranque con `app.mongodb.verify-on-startup=false`. No acceden a Atlas:
-que esas pruebas pasen no confirma una conexión real al clúster. Con la URI de
-ejemplo todavía falta reemplazar `<db_password>` antes de iniciar la aplicación.
-
-La configuración corresponde a
-[MongoDB en Spring Boot](https://docs.spring.io/spring-boot/reference/data/nosql.html#data.nosql.mongodb)
-y al [cliente Java de MongoDB](https://www.mongodb.com/docs/drivers/java/sync/current/connection/mongoclient/).
-
-## Rutas de las vistas
-
-| Ruta | HTML |
-| --- | --- |
-| `/` o `/login` | `/views/login.html` |
-| `/dashboard` | `/views/dashboard.html` |
-| `/habitaciones` | `/views/habitaciones.html` |
-| `/reservas` | `/views/reservas.html` |
-| `/finanzas` | `/views/finanzas.html` |
-| `/limpieza` | `/views/limpieza.html` |
-
-También funcionan los alias `/login.html`, `/dashboard.html`, `/habitaciones.html`,
-`/reservas.html`, `/finanzas.html` y `/limpieza.html`, y los enlaces directos
-`/pages/*.html` existentes, que redirigen a `/views/*.html`. Estas rutas sirven
-las pantallas; los botones que aún
-no tienen navegación o acciones de negocio siguen pendientes de implementación.
-
-## Ejecución
-
-Desde esta carpeta, en PowerShell:
+1. Configura `.env` en el directorio superior o en esta carpeta, tomando como guía
+   `.env.example`. No publiques contraseñas. `MONGODB_URI` contiene la URI local o de Atlas;
+   `MONGODB_DATABASE` el nombre de la base.
+2. Para MongoDB local, configura primero [el replica set local](docs/mongodb-local.md).
+   Si utilizas Atlas, comprueba los permisos del usuario y la IP autorizada.
+   Reservas y limpieza requieren un replica set compatible con transacciones.
+3. Desde esta carpeta:
 
 ```powershell
 .\mvnw.cmd spring-boot:run
 ```
 
-También se puede iniciar el proyecto `staycontrol` desde Spring Boot Dashboard.
-Abre `http://localhost:8080/` o cualquiera de las rutas de la tabla. Reinicia
-Spring Boot después de modificar controladores o configuración.
+Abre `http://localhost:8080/registro`, crea tu cuenta y entra por `/login`.
+Los nuevos usuarios no necesitan ser elevados a ADMIN para gestionar su hotel.
+No hay credenciales predeterminadas. El aprovisionamiento `AUTH_BOOTSTRAP_*`
+es opcional para instalaciones administradas, no un requisito del registro.
 
-Durante el desarrollo, Spring Boot lee primero `frontend/` desde el directorio
-de ejecución. Maven también copia las vistas a `target/classes/static/` y las
-incluye en el JAR; esa copia permite ejecutarlo desde otra carpeta. Edita los
-archivos de `frontend/`, no las copias generadas en `target/`. Vuelve a compilar
-para actualizar el contenido empaquetado.
+También puedes iniciar `StaycontrolApplication` con Spring Boot Dashboard.
 
-Abre las vistas por HTTP desde Spring Boot: sus imports de JavaScript necesitan
-un servidor. `package.json` declara módulos ES y no añade dependencias ni un
-servidor Node para ejecutar la aplicación.
+## Datos de la versión anterior
+
+Lee [multi-hotel](docs/multi-hotel.md) antes de usar datos existentes.
+`LEGACY_HOTEL_OWNER_EMAIL` asigna el acceso a las colecciones históricas a una
+sola cuenta existente y confirmada. Vacío significa que esos datos se conservan,
+pero no se muestran a ninguna cuenta. No se borran ni se copian automáticamente.
+
+El nombre del hotel es descriptivo; no decide la propiedad de los datos. Cada
+cuenta tiene un hotel independiente. Aún no hay invitaciones de empleados.
+
+## Compilar y empaquetar sin ejecutar pruebas
 
 ```powershell
-.\mvnw.cmd clean package
+.\mvnw.cmd -B -o package '-Dmaven.test.skip=true'
 java -jar target/staycontrol-0.0.1-SNAPSHOT.jar
 ```
 
-Para probar los modelos, servicios y referencias del frontend desde esta carpeta:
+`-o` usa las dependencias ya descargadas. En una instalación nueva, quítalo.
+Maven incluye el frontend dentro del JAR. Durante desarrollo, Spring también
+lee `frontend/` desde el directorio de ejecución; no edites las copias en `target/`.
 
-```powershell
-node --test frontend/tests/*.test.js
-```
+## Vistas y APIs
 
-Esta configuración utiliza el soporte de
-[recursos estáticos de Spring Boot](https://docs.spring.io/spring-boot/reference/web/servlet.html#web.servlet.spring-mvc.static-content)
-y los [directorios de recursos de Maven](https://maven.apache.org/plugins/maven-resources-plugin/examples/resource-directory.html).
+| Módulo | Vista | Base de API |
+| --- | --- | --- |
+| Acceso | `/login`, `/registro` | `/api/v1/auth` |
+| Dashboard | `/dashboard` | `/api/v1/dashboard` |
+| Habitaciones | `/habitaciones` | `/api/v1/habitaciones` |
+| Reservas | `/reservas` | `/api/v1/reservas` |
+| Limpieza | `/limpieza` | `/api/v1/limpieza` |
+| Finanzas | `/finanzas` | `/api/v1/finanzas` |
+
+Las APIs requieren sesión; las escrituras también CSRF. Los POST de creación
+requieren `Idempotency-Key`. Los errores no se sustituyen por datos ficticios.
+Consulta [integración del frontend](docs/frontend-integracion.md) y los documentos
+`docs/api-*.md` para contratos, transiciones y ejemplos.
+
+## Límites y publicación
+
+- Recuperación de contraseña aplazada expresamente; su vista no envía correos.
+- Sin verificación de correo, MFA, cobros bancarios ni facturación fiscal.
+- Los estados físicos de habitaciones se administran manualmente. Reservas y
+  limpieza no cambian automáticamente esos estados; finanzas no registra cobros
+  automáticamente a partir de una reserva.
+- Las sesiones se pierden al reiniciar. El limitador de login es local por instancia.
+- El servidor escucha en `127.0.0.1` por defecto. Para publicar hacen falta hosting,
+  HTTPS, cookies Secure, control de red y copias de seguridad. No habilites CORS abierto.
+- El empaquetado híbrido se definirá por separado, sin asumir plataforma nativa.
+
+No confundir compilación o rutas HTTP correctas con validación integral: no se
+han ejecutado pruebas automatizadas ni escrituras de prueba en Atlas en esta etapa.
+Antes de producción falta comprobar los flujos con dos cuentas y un entorno de
+pruebas autorizado, además de confirmar al propietario de los datos históricos.

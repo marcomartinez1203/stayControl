@@ -1,21 +1,71 @@
 # API de reservas
 
-Base: `/api/v1/reservas`. Requiere sesión ADMIN y CSRF para escrituras, igual que
-[habitaciones](api-habitaciones.md). La vista de reservas todavía usa datos de ejemplo.
+Base: `/api/v1/reservas`. Requiere sesión autenticada del hotel y CSRF para escrituras, igual que
+[habitaciones](api-habitaciones.md). La vista de reservas consume datos reales de esta API.
 
 | Método | Ruta | Resultado |
 | --- | --- | --- |
 | GET | `/` | Listado paginado: `items`, `pagina`, `tamano`, `total` |
 | GET | `/{id}` | Consulta individual; `404` si no existe |
+| GET | `/disponibilidad` | Disponibilidad orientativa y cotización de una habitación |
 | POST | `/` | Creación `201`; exige `Idempotency-Key` |
 | PUT | `/{id}/estado` | Cancelar o finalizar, `200` |
 | DELETE | `/{id}` | Cancelación lógica, `204`; nunca borra el historial |
 
-El listado admite `estado=CONFIRMADA`, `CANCELADA` o `FINALIZADA`, `habitacionId`,
+El listado admite `estado=CONFIRMADA`, `CANCELADA` o `FINALIZADA`, `habitacionId`, `fecha=AAAA-MM-DD`, `buscar`,
 `pagina` (0–10000) y `tamano` (1–100, por defecto 20). Se ordena por fecha de entrada
 e id. La página y su total son lecturas separadas, no una instantánea conjunta.
 
+`buscar` encuentra parte del nombre del huésped, sin distinguir mayúsculas y
+minúsculas; conserva diferencias de acentos. Se recortan espacios exteriores y
+se admiten hasta 120 caracteres sin controles. Vacío equivale a no filtrar.
+Los caracteres especiales se buscan literalmente, no se interpretan como una
+expresión regular proporcionada por el cliente. El filtro se combina con fecha,
+estado y habitación; listado y total usan los mismos criterios antes de paginar.
+
+Ejemplo: `GET /api/v1/reservas?buscar=Ana&estado=CONFIRMADA&pagina=0&tamano=20`.
+En la vista, abrir «Gestionar / actualizar», escribir en «Buscar por huésped»
+y pulsar «Buscar / actualizar» o Enter. Cambiar el estado también aplica los
+campos de búsqueda; «Limpiar búsqueda» conserva fecha y estado. Cambiar el día
+del calendario o la página conserva el texto ya aplicado, sin tomar lo escrito
+posteriormente hasta aplicar de nuevo. Es una consulta sin escrituras ni cambios
+en la idempotencia de creación.
+
+`fecha` es opcional, entre 2000 y 2100. Incluye reservas cuya entrada <= fecha y
+salida > fecha: noches de estancia, no las salidas de ese día. Sin `estado`, también
+incluye canceladas/finalizadas para consultar historial; combina `estado=CONFIRMADA`
+para estancias programadas activas. Sin fecha conserva el listado completo anterior.
+Formato o rango inválidos: 400. El filtro y el total se calculan en MongoDB antes
+de la paginación; no dependen de los registros cargados en la vista.
+
+Ejemplo: `GET /api/v1/reservas?fecha=2026-10-04&estado=CONFIRMADA&pagina=0&tamano=20`.
+Es una consulta de solo lectura, sin CSRF ni `Idempotency-Key`; sí requiere sesión autenticada.
+La vista permite elegir un día, navegar entre bloques y quitar la fecha con «Todas».
+«Hoy» usa la fecha local del dispositivo y no cambia el estado de las reservas.
+
 ## Crear
+
+Antes de crear se puede consultar:
+
+`GET /api/v1/reservas/disponibilidad?habitacionId=<id>&personas=2&fechaEntrada=2026-12-10&fechaSalida=2026-12-12`
+
+Requiere sesión autenticada. Parámetros obligatorios, mismas reglas de capacidad y fechas que
+la creación. Devuelve `habitacionId`, `numeroHabitacion`, `fechaEntrada`,
+`fechaSalida`, `personas`, `noches`, `disponible`, `motivo`, `precioNoche` y `total`.
+Mantenimiento, capacidad excedida o cruce de reservas dan `200` con
+`disponible: false` y motivo; datos inválidos dan `400`, habitación inexistente
+o eliminada da `404`. Los importes los calcula Java con BigDecimal.
+
+La consulta no escribe ni bloquea fechas, no requiere CSRF/Idempotency-Key y
+su respuesta no se almacena en caché. Las lecturas pueden cambiar por operaciones
+concurrentes: la creación vuelve a validar disponibilidad y tarifa dentro de su
+transacción. No comprueba que el estado físico sea DISPONIBLE, igual que la
+creación: solo MANTENIMIENTO impide reservar por estado físico.
+
+El formulario ofrece «Consultar disponibilidad y precio» sin exigir aún el
+nombre del huésped. Editar los campos invalida el resultado mostrado; respuestas
+anteriores no reemplazan una consulta nueva. Consultar no envía el formulario
+ni registra movimientos financieros.
 
 ```json
 {
@@ -92,8 +142,8 @@ no se hayan finalizado. No se cambia automáticamente el estado físico de la ha
 (OCUPADA, LIMPIEZA, etc.). No edites manualmente `reservasActivas` ni borres reservas:
 el contador forma parte de la integridad entre colecciones.
 
-Esta etapa no incluye reprogramación, cambio de huésped/habitación, check-in,
-cobros ni integración de la vista. Para corregir una reserva, cancela y crea otra
+Esta etapa no incluye reprogramación, cambio de huésped/habitación, check-in
+ni cobros. Para corregir una reserva, cancela y crea otra
 con una clave nueva. No es una operación conjunta de reprogramación.
 
 ## Verificación

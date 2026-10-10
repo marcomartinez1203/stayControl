@@ -102,6 +102,31 @@ body {
     padding: 0 24px 20px;
 }
 
+.calendar-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    padding: 0 24px 12px;
+    color: var(--text);
+    font-size: 11px;
+}
+.calendar-controls > span { flex: 1; min-width: 0; text-align: center; line-height: 1.4; }
+.calendar-controls button {
+    min-width: 28px;
+    min-height: 32px;
+    padding: 4px 6px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--white);
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+}
+.calendar-controls button[aria-pressed="true"] { color: var(--blue); border-color: var(--blue); }
+.calendar-controls button:disabled { opacity: .4; cursor: not-allowed; }
+.calendar-controls button:focus-visible, .day:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
 .day {
     width: 48px;
     height: 58px;

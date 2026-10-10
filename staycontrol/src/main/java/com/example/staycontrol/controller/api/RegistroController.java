@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/auth")
 public class RegistroController {
-    public record RegistroResponse(String email, String usuario, String rol) { }
+    public record RegistroResponse(String email, String usuario, String rol, String nombreHotel) { }
     private final RegistroService service;
     private final LoginAttemptLimiter limiter;
 
@@ -28,6 +28,6 @@ public class RegistroController {
         return ResponseEntity.status(201)
             .header("Idempotency-Replayed", Boolean.toString(resultado.repetido()))
             .header("Cache-Control", "no-store")
-            .body(new RegistroResponse(resultado.email(), resultado.usuario(), resultado.rol()));
+            .body(new RegistroResponse(resultado.email(), resultado.usuario(), resultado.rol(), resultado.nombreHotel()));
     }
 }

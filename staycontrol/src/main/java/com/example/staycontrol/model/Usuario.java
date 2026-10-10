@@ -6,9 +6,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document("usuarios")
 public record Usuario(@Id String email, @JsonIgnore String passwordHash, String usuario,
-    String rol, @JsonIgnore String registroKey) {
+    String rol, @JsonIgnore String registroKey, String nombreHotel) {
     public Usuario(String email, String passwordHash) {
-        this(email, passwordHash, null, "ADMIN", null);
+        this(email, passwordHash, null, "ADMIN", null, null);
+    }
+    public Usuario(String email, String passwordHash, String usuario, String rol, String registroKey) {
+        this(email, passwordHash, usuario, rol, registroKey, null);
     }
 
     public String rolEfectivo() {

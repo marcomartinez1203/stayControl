@@ -50,10 +50,12 @@ body {
 ========================= */
 
 .header {
-    height: 60px;
+    min-height: 60px;
     flex-shrink: 0;
 
     display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
     align-items: center;
     justify-content: space-between;
 
@@ -191,8 +193,13 @@ body {
 
     min-width: 0;
 
-    white-space: nowrap;
+    flex-wrap: wrap;
+    overflow-wrap: anywhere;
 }
+
+/* Las descripciones reales y las fechas pueden ocupar más de una línea. */
+.task-top, .task-bottom { flex-wrap: wrap; }
+.room-name { flex: 1 1 120px; }
 
 .room-name strong {
     color: var(--dark);
@@ -257,7 +264,8 @@ body {
 
     font-size: 12px;
 
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 /* =========================

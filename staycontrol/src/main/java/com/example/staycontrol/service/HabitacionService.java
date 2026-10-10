@@ -57,6 +57,20 @@ public class HabitacionService {
         return new PaginaResponse<>(items, pagina, tamano, repository.contar(estado));
     }
 
+    public PaginaResponse<HabitacionResponse> listar(EstadoHabitacion estado, int pagina, int tamano, String buscar) {
+        String texto = buscar == null ? "" : buscar.strip();
+        if (texto.length() > 60 || texto.codePoints().anyMatch(Character::isISOControl)) {
+            throw ApiException.invalida("buscar admite hasta 60 caracteres sin controles.");
+        }
+        if (texto.isEmpty()) { return listar(estado, pagina, tamano); }
+        if (pagina < 0 || pagina > 10000 || tamano < 1 || tamano > 100) {
+            throw ApiException.invalida("pagina debe estar entre 0 y 10000; tamano, entre 1 y 100.");
+        }
+        var items = repository.listar(estado, pagina, tamano, texto).stream()
+            .map(habitacion -> HabitacionResponse.de(habitacion.id(), habitacion.datos())).toList();
+        return new PaginaResponse<>(items, pagina, tamano, repository.contar(estado, texto));
+    }
+
     public HabitacionResponse obtener(String id) {
         Habitacion habitacion = buscarActiva(id);
         return HabitacionResponse.de(habitacion.id(), habitacion.datos());

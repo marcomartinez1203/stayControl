@@ -1,13 +1,13 @@
 # API v1: habitaciones e idempotencia
 
 Primera API de negocio. URL base local: `http://127.0.0.1:8080/api/v1`.
-Las vistas HTML conservan sus datos de ejemplo: todavía no llaman estos endpoints.
+La vista de habitaciones consume estos endpoints; requiere una sesión autenticada del hotel.
 Las APIs de [reservas](api-reservas.md) y [limpieza](api-limpieza.md) ya existen;
 las APIs de [finanzas](api-finanzas.md) y [dashboard](api-dashboard.md) también están disponibles.
 
 ## Seguridad y arranque
 
-Esta versión requiere una sesión ADMIN y CSRF en las escrituras. Consulta la
+Esta versión requiere una sesión autenticada del hotel y CSRF en las escrituras. Consulta la
 [API de autenticación](api-autenticacion.md) para aprovisionar el operador e iniciar
 sesión. El servidor escucha en `127.0.0.1` por defecto. Antes de exponerlo en una red
 pública se requiere HTTPS y cookies Secure. No se habilita CORS abierto.
@@ -18,11 +18,11 @@ Desde la carpeta que contiene este documento, sube un nivel y ejecuta:
 .\mvnw.cmd spring-boot:run
 ```
 
-La conexión usa `.env` como antes. Al arrancar se prepara la colección
-`habitaciones` y el índice único `uk_habitaciones_numero` sobre `datos.numero`.
-Se necesitan permisos de escritura y creación de índices en la base configurada.
-Si existen números duplicados o faltan permisos, el arranque falla: no se eliminan
-datos ni se ignora el problema. No se insertan habitaciones de ejemplo automáticamente.
+La conexión usa `.env`. Antes de la primera creación de cada hotel se prepara
+su colección y el índice único `uk_habitaciones_numero` sobre `datos.numero`.
+Se necesitan permisos de escritura y creación de índices. Si falla el índice,
+no se permite la creación; no se borran datos ni se ignora el problema.
+No se insertan habitaciones de ejemplo automáticamente.
 
 ## Endpoints
 
@@ -72,6 +72,23 @@ La lista contiene `items`, `pagina`, `tamano` y `total`. Se ordena por número
 lexicográficamente. `pagina` empieza en cero (hasta 10000) y `tamano` va de 1 a 100.
 El total y la página son lecturas separadas: pueden variar si hay escrituras concurrentes.
 
+### Búsqueda por número o tipo
+
+`GET /api/v1/habitaciones?buscar=Suite&estado=DISPONIBLE&pagina=0&tamano=20`
+
+`buscar` es opcional. Admite hasta 60 caracteres sin controles, recorta espacios
+exteriores y busca coincidencias parciales en `numero` o `tipo`, sin distinguir
+mayúsculas/minúsculas. Los acentos no se eliminan. Los caracteres como `.` o `*`
+son literales, no expresiones regulares. Un texto vacío mantiene el listado completo.
+El filtro se combina con `estado`, excluye eliminadas y se aplica antes de paginar;
+el total usa los mismos criterios. Texto inválido: 400. Requiere sesión autenticada.
+
+La lupa de la vista abre el campo; Enter o «Buscar / actualizar» aplica la búsqueda.
+«Limpiar búsqueda» elimina el texto conservando el estado. Los filtros de estado
+incluyen Mantenimiento y se mantienen sincronizados con el selector.
+La búsqueda parcial puede recorrer documentos; no añade un índice de texto ni
+garantiza rendimiento para inventarios masivos.
+
 ## Contrato de idempotencia
 
 1. Genera una clave nueva por **operación de creación**, preferiblemente un UUID.
@@ -119,12 +136,10 @@ de un PUT o DELETE reproduce la **respuesta de creación original**, no el estad
 actual, y no modifica ni resucita la habitación. Para el estado actual se usa GET.
 No borres documentos manualmente si necesitas conservar estas garantías.
 
-El alcance actual es una sola aplicación/establecimiento con operadores ADMIN;
-las claves de habitaciones son compartidas dentro de ese establecimiento.
-Antes de añadir multitenencia, el ámbito de la clave debe incluir el establecimiento
-obtenido de la sesión autenticada. Este patrón de un documento es adecuado
-para habitaciones; una operación futura que escriba en varias colecciones necesitará
-su propio diseño atómico (por ejemplo, una transacción), no dos escrituras sueltas.
+Cada cuenta tiene colecciones de negocio aisladas mediante `HotelMongoTemplate`.
+Las claves y los números de habitación se resuelven dentro de ese hotel, no en
+las colecciones de otras cuentas. Ver [aislamiento multi-hotel](multi-hotel.md).
+Reservas y limpieza coordinan sus cambios con habitaciones mediante transacciones.
 
 ## Probar desde PowerShell
 

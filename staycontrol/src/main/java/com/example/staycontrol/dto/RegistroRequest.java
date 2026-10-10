@@ -2,7 +2,10 @@ package com.example.staycontrol.dto;
 
 import com.example.staycontrol.exception.ApiException;
 
-public record RegistroRequest(String usuario, String email, String password) {
+public record RegistroRequest(String usuario, String email, String password, String nombreHotel) {
+    public String hotelNormalizado() {
+        return HotelRequest.normalizar(nombreHotel);
+    }
     public String nombreNormalizado() {
         String nombre = usuario == null ? "" : usuario.strip();
         if (nombre.isEmpty() || nombre.length() > 120 || nombre.chars().anyMatch(Character::isISOControl)) {

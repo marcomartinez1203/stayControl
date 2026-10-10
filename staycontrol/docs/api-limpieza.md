@@ -1,7 +1,7 @@
 # API de limpieza
 
-Base `/api/v1/limpieza`. Requiere sesión ADMIN y CSRF en escrituras.
-La vista existente sigue usando datos locales: aún no consume esta API.
+Base `/api/v1/limpieza`. Requiere sesión autenticada del hotel y CSRF en escrituras.
+La vista consume esta API para crear, listar y cambiar el estado de las tareas.
 
 | Método | Ruta | Resultado |
 | --- | --- | --- |
@@ -15,6 +15,17 @@ Listado: filtros opcionales `estado`, `habitacionId`, `fecha=2026-12-10`.
 `pagina`: 0–10000; `tamano`: 1–100, por defecto 20. Respuesta
 `{items, pagina, tamano, total}`, ordenada por fecha e id. Página y total son
 lecturas separadas, no una instantánea conjunta.
+
+La vista permite aplicar fecha programada y estado desde «Gestionar / actualizar».
+«Hoy» usa la fecha local del dispositivo; «Todas las fechas» elimina solo el filtro
+de fecha. Al paginar o completar una tarea se conservan los filtros aplicados,
+sin tomar cambios pendientes de pulsar «Actualizar». El encabezado muestra el
+período elegido; inicialmente se consultan todas las fechas.
+
+Las tareas PENDIENTE/EN_PROCESO anteriores a hoy muestran «Vencida», usando el
+estilo de prioridad existente. Es un aviso visual, no un nuevo estado ni un cambio
+automático en MongoDB. El formulario de creación propone el día filtrado o, sin
+filtro, el día actual; puede cambiarse antes de guardar.
 
 ## Crear
 
@@ -73,7 +84,8 @@ clave y cuerpo o el mismo estado deseado. No hay reintentos automáticos.
 No modificar manualmente contadores ni borrar documentos si se requiere conservar
 la integridad y el historial de idempotencia.
 
-No incluye notificaciones, reasignación, gestión de personal ni conexión de las
-casillas del frontend. Verificación: solo compilación
+Las casillas del frontend solicitan confirmación y completan la tarea mediante
+la API; las tareas cerradas no pueden desmarcarse ni reabrirse.
+No incluye notificaciones, reasignación ni gestión de personal. Verificación: solo compilación
 (`mvnw.cmd -B -o compile -Dmaven.test.skip=true`), sin crear/ejecutar pruebas ni
 realizar operaciones contra Atlas.

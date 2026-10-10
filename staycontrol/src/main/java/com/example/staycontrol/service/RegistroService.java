@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class RegistroService {
-    public record Resultado(String email, String usuario, String rol, boolean repetido) { }
+    public record Resultado(String email, String usuario, String rol, String nombreHotel, boolean repetido) { }
     private final UsuarioRepository repository;
     private final PasswordEncoder encoder;
     private final IdempotencyService idempotencia;
@@ -26,26 +26,27 @@ public class RegistroService {
     public Resultado registrar(RegistroRequest datos, String clave) {
         String email = LoginRequest.normalizarEmail(datos.email());
         String nombre = datos.nombreNormalizado();
+        String hotel = datos.hotelNormalizado();
         datos.validarPassword();
         // La clave se delimita por operación y correo; no permite sobrescribir otra cuenta.
         String identidad = idempotencia.identificador("POST:/api/v1/auth/registro:" + email, clave);
         var existente = repository.buscar(email);
-        if (existente.isPresent()) { return repetir(existente.get(), identidad, nombre, datos.password()); }
+        if (existente.isPresent()) { return repetir(existente.get(), identidad, nombre, datos.password(), hotel); }
         try {
-            repository.insertar(new Usuario(email, encoder.encode(datos.password()), nombre, "USER", identidad));
-            return new Resultado(email, nombre, "USER", false);
+            repository.insertar(new Usuario(email, encoder.encode(datos.password()), nombre, "USER", identidad, hotel));
+            return new Resultado(email, nombre, "USER", hotel, false);
         } catch (DuplicateKeyException exception) {
             Usuario ganador = repository.buscar(email).orElseThrow(() -> new ApiException(
                 HttpStatus.SERVICE_UNAVAILABLE, "REGISTRO_EN_PROCESO", "Reintenta con la misma Idempotency-Key."));
-            return repetir(ganador, identidad, nombre, datos.password());
+            return repetir(ganador, identidad, nombre, datos.password(), hotel);
         }
     }
 
-    private Resultado repetir(Usuario usuario, String identidad, String nombre, String password) {
+    private Resultado repetir(Usuario usuario, String identidad, String nombre, String password, String hotel) {
         if (!identidad.equals(usuario.registroKey()) || !nombre.equals(usuario.usuario())
-            || !encoder.matches(password, usuario.passwordHash())) {
+            || !hotel.equals(usuario.nombreHotel()) || !encoder.matches(password, usuario.passwordHash())) {
             throw ApiException.conflicto("REGISTRO_NO_DISPONIBLE", "No se puede completar el registro con estos datos.");
         }
-        return new Resultado(usuario.email(), usuario.usuario(), "USER", true);
+        return new Resultado(usuario.email(), usuario.usuario(), "USER", usuario.nombreHotel(), true);
     }
 }

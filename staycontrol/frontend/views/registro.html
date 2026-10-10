@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StayControl - Crear cuenta</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="preload" href="../assets/fonts/DMSans-Variable.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="stylesheet" href="../assets/css/login.css">
     <link rel="stylesheet" href="../assets/css/registro.css">
+    <link rel="stylesheet" href="../assets/css/experiencia.css">
 </head>
 <body>
     <main class="login registro">
@@ -27,43 +26,51 @@
                 </div>
             </header>
 
-            <section class="form-section" aria-label="Datos de registro">
+            <form id="registroForm" class="form-section" aria-label="Datos de registro">
                 <div class="field">
                     <label for="usuario">Nombre de usuario</label>
                     <div class="input-container">
-                        <input type="text" id="usuario" autocomplete="nickname" placeholder="Tu nombre de usuario" maxlength="120">
+                        <input type="text" id="usuario" autocomplete="nickname" placeholder="Tu nombre de usuario" maxlength="120" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="nombreHotel">Nombre del hotel</label>
+                    <div class="input-container">
+                        <input type="text" id="nombreHotel" autocomplete="organization" placeholder="Nombre de tu hotel" maxlength="120" required>
                     </div>
                 </div>
                 <div class="field">
                     <label for="email">Correo electrónico</label>
                     <div class="input-container">
-                        <input type="email" id="email" autocomplete="email" placeholder="nombre@correo.com">
+                        <input type="email" id="email" autocomplete="email" placeholder="nombre@correo.com" maxlength="254" required>
                     </div>
                 </div>
                 <div class="field">
                     <label for="password">Contraseña</label>
                     <div class="input-container">
-                        <input type="password" id="password" autocomplete="new-password" placeholder="Crea una contraseña" minlength="12" maxlength="128" aria-describedby="passwordHint">
+                        <input type="password" id="password" autocomplete="new-password" placeholder="Crea una contraseña" minlength="12" maxlength="128" aria-describedby="passwordHint" required>
                     </div>
                     <p class="field-hint" id="passwordHint">Entre 12 y 128 caracteres.</p>
                 </div>
                 <div class="field">
                     <label for="confirmPassword">Confirmar contraseña</label>
                     <div class="input-container">
-                        <input type="password" id="confirmPassword" autocomplete="new-password" placeholder="Repite tu contraseña" minlength="12" maxlength="128">
+                        <input type="password" id="confirmPassword" autocomplete="new-password" placeholder="Repite tu contraseña" minlength="12" maxlength="128" required>
                     </div>
                 </div>
-            </section>
+            </form>
         </div>
 
         <footer class="bottom-area">
-            <p class="view-notice" id="registroNotice">Vista previa: el registro todavía no está habilitado. No se guardan los datos.</p>
-            <button type="button" class="login-button" disabled aria-describedby="registroNotice">Crear cuenta</button>
+            <p class="view-notice" id="registroNotice" role="status" aria-live="polite">La cuenta nueva no incluye permisos de administrador.</p>
+            <noscript>Activa JavaScript para registrar tu cuenta.</noscript>
+            <button type="submit" form="registroForm" id="registroButton" class="login-button" disabled aria-describedby="registroNotice">Crear cuenta</button>
             <div class="register-footer">
                 <span>¿Ya tienes una cuenta?</span>
                 <a href="/login">Inicia sesión</a>
             </div>
         </footer>
     </main>
+    <script type="module" src="../controllers/registroController.js"></script>
 </body>
 </html>

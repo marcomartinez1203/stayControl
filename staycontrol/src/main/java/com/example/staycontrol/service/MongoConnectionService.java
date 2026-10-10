@@ -23,9 +23,14 @@ public class MongoConnectionService {
         try {
             response = mongoTemplate.executeCommand(new Document("ping", 1));
         } catch (DataAccessException exception) {
+            Throwable causa = exception;
+            while (causa.getCause() != null && causa.getCause() != causa) { causa = causa.getCause(); }
+            // Solo tipo y código numérico: nunca mensajes del driver, URI ni credenciales.
+            String codigo = causa instanceof com.mongodb.MongoException mongo ? Integer.toString(mongo.getCode()) : "N/A";
+            log.error("Diagnóstico de conexión MongoDB: tipo={}, código={}", causa.getClass().getSimpleName(), codigo);
             // No incluir credenciales ni la URI en los mensajes de error.
             throw new IllegalStateException(
-                "No se pudo conectar a MongoDB. Revisa las credenciales, la red y la IP autorizada en Atlas."
+                "No se pudo conectar a MongoDB. Revisa el servicio, el replica set, la red y las credenciales configuradas."
             );
         }
 

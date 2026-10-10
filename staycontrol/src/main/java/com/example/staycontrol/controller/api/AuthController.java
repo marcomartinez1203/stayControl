@@ -1,6 +1,8 @@
 package com.example.staycontrol.controller.api;
 
 import com.example.staycontrol.dto.LoginRequest;
+import com.example.staycontrol.dto.PerfilUsuarioResponse;
+import com.example.staycontrol.dto.HotelRequest;
 import com.example.staycontrol.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,6 +27,11 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public UsuarioResponse me(Authentication authentication) { return new UsuarioResponse(authentication.getName()); }
+    public PerfilUsuarioResponse me(Authentication authentication) { return service.perfil(authentication.getName()); }
+
+    @PutMapping("/me/hotel")
+    public PerfilUsuarioResponse actualizarHotel(Authentication authentication, @RequestBody HotelRequest datos) {
+        return service.actualizarHotel(authentication.getName(), datos);
+    }
     // POST /logout lo procesa Spring Security: invalida sesión, contexto y cookie.
 }

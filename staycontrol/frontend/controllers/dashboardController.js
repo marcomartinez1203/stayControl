@@ -1,9 +1,3 @@
-document.querySelectorAll(".nav-item").forEach(item => {
-    item.addEventListener("click", () => {
-        document
-            .querySelectorAll(".nav-item")
-            .forEach(nav => nav.classList.remove("active"));
+import { iniciarNegocio } from "./negocioController.js";
 
-        item.classList.add("active");
-    });
-});
+iniciarNegocio("dashboard");

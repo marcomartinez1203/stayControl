@@ -5,14 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StayControl - Iniciar Sesión</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
-        rel="stylesheet"
-    >
+    <link rel="preload" href="../assets/fonts/DMSans-Variable.ttf" as="font" type="font/ttf" crossorigin>
 
     <link rel="stylesheet" href="../assets/css/login.css">
+    <link rel="stylesheet" href="../assets/css/experiencia.css">
 </head>
 
 <body>
@@ -82,7 +78,9 @@
                         <input
                             type="email"
                             id="email"
-                            value="admin@staycontrol.com"
+                            placeholder="tu-correo@ejemplo.com"
+                            autocomplete="username"
+                            required
                         >
                     </div>
                 </div>
@@ -114,7 +112,9 @@
                         <input
                             type="password"
                             id="password"
-                            value="123456789012"
+                            placeholder="Tu contraseña"
+                            autocomplete="current-password"
+                            required
                         >
 
                         <button
@@ -156,7 +156,8 @@
         <!-- Área inferior -->
         <section class="bottom-area">
 
-            <button class="login-button" id="loginButton">
+            <p id="loginNotice" role="status" aria-live="polite"></p>
+            <button type="button" class="login-button" id="loginButton">
                 Iniciar Sesión
             </button>
 

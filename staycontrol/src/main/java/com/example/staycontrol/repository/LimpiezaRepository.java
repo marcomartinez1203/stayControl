@@ -16,14 +16,15 @@ import java.util.Optional;
 @Repository
 public class LimpiezaRepository {
     private final MongoTemplate mongo;
-    private boolean indicesListos;
+    private final java.util.Set<String> indicesListos = new java.util.HashSet<>();
     public LimpiezaRepository(MongoTemplate mongo) { this.mongo = mongo; }
 
     public synchronized void prepararIndices() {
-        if (indicesListos) { return; }
+        String coleccion = mongo.getCollectionName(TareaLimpieza.class);
+        if (indicesListos.contains(coleccion)) { return; }
         mongo.indexOps(TareaLimpieza.class).createIndex(new Index().on("datos.habitacionId", Sort.Direction.ASC)
             .on("datos.fechaProgramada", Sort.Direction.ASC).on("estado", Sort.Direction.ASC).named("ix_limpieza_agenda"));
-        indicesListos = true;
+        indicesListos.add(coleccion);
     }
 
     public Optional<TareaLimpieza> buscar(String id) { return Optional.ofNullable(mongo.findById(id, TareaLimpieza.class)); }

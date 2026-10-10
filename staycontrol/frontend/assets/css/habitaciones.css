@@ -17,6 +17,20 @@
     --white: #ffffff;
 }
 
+/* Paneles de la SPA: la cabecera y la navegación permanecen montadas. */
+.habitaciones-spa { display: grid; gap: 12px; min-width: 0; }
+.habitaciones-spa > button { justify-self: start; }
+.habitaciones-spa > button {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    background: white;
+    color: var(--dark);
+    font: inherit;
+    cursor: pointer;
+}
+.app > .filter-scroll[hidden], .header .search-btn[hidden] { display: none; }
+
 body {
     min-height: 100vh;
 

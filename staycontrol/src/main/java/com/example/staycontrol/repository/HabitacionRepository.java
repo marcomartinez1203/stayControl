@@ -15,17 +15,22 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Repository
 public class HabitacionRepository {
     private final MongoTemplate mongo;
+    private final java.util.Set<String> indicesListos = new java.util.HashSet<>();
 
     public HabitacionRepository(MongoTemplate mongo) { this.mongo = mongo; }
 
-    public void prepararIndices() {
+    public synchronized void prepararIndices() {
+        String coleccion = mongo.getCollectionName(Habitacion.class);
+        if (indicesListos.contains(coleccion)) { return; }
         // _id ya es único; este segundo índice impide dos claves distintas para un mismo número.
         mongo.indexOps(Habitacion.class).createIndex(
             new Index().on("datos.numero", Sort.Direction.ASC).unique().named("uk_habitaciones_numero"));
+        indicesListos.add(coleccion);
     }
 
     public Optional<Habitacion> buscarPorId(String id) {
@@ -38,6 +43,7 @@ public class HabitacionRepository {
     }
 
     public Habitacion insertar(Habitacion habitacion) {
+        prepararIndices();
         // insert, nunca save/upsert: un reintento no puede sobrescribir la creación original.
         return mongo.insert(habitacion);
     }
@@ -50,6 +56,23 @@ public class HabitacionRepository {
 
     public long contar(EstadoHabitacion estado) {
         return mongo.count(activas(estado), Habitacion.class);
+    }
+
+    public List<Habitacion> listar(EstadoHabitacion estado, int pagina, int tamano, String buscar) {
+        return mongo.find(activas(estado, buscar).with(Sort.by("datos.numero"))
+            .skip((long) pagina * tamano).limit(tamano), Habitacion.class);
+    }
+
+    public long contar(EstadoHabitacion estado, String buscar) {
+        return mongo.count(activas(estado, buscar), Habitacion.class);
+    }
+
+    private Query activas(EstadoHabitacion estado, String buscar) {
+        // Texto literal, nunca una expresión regular proporcionada por el cliente.
+        String literal = Pattern.quote(buscar);
+        return activas(estado).addCriteria(new Criteria().orOperator(
+            Criteria.where("datos.numero").regex(literal, "i"),
+            Criteria.where("datos.tipo").regex(literal, "i")));
     }
 
     public Optional<Habitacion> actualizar(String id, DatosHabitacion datos) {

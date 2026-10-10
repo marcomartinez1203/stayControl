@@ -20,9 +20,10 @@ public class HabitacionController {
     public PaginaResponse<HabitacionResponse> listar(
         @RequestParam(required = false) EstadoHabitacion estado,
         @RequestParam(defaultValue = "0") int pagina,
-        @RequestParam(defaultValue = "20") int tamano
+        @RequestParam(defaultValue = "20") int tamano,
+        @RequestParam(required = false) String buscar
     ) {
-        return service.listar(estado, pagina, tamano);
+        return service.listar(estado, pagina, tamano, buscar);
     }
 
     @GetMapping("/{id}")

@@ -11,6 +11,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 
 @RestControllerAdvice(basePackages = "com.example.staycontrol.controller.api")
 public class ApiExceptionHandler {
@@ -35,7 +36,8 @@ public class ApiExceptionHandler {
             .body(new ErrorResponse("CREDENCIALES_INVALIDAS", "Email o contraseña incorrectos."));
     }
 
-    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class,
+        MissingServletRequestParameterException.class})
     public ResponseEntity<ErrorResponse> entradaInvalida(Exception exception) {
         return ResponseEntity.badRequest().body(new ErrorResponse("SOLICITUD_INVALIDA",
             "Revisa el JSON, los tipos de datos y los estados permitidos."));

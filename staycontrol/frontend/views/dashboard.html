@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StayControl - Dashboard</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preload" href="../assets/fonts/DMSans-Variable.ttf" as="font" type="font/ttf" crossorigin>
 
     <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="stylesheet" href="../assets/css/negocio.css">
+    <link rel="stylesheet" href="../assets/css/experiencia.css">
 </head>
 
 <body>
@@ -20,12 +20,8 @@
     <header class="header">
 
         <div>
-            <p class="hello">Hola, Alejandro 👋</p>
-            <h1>Hostal Vista Alegre</h1>
-        </div>
-
-        <div class="avatar">
-            <img src="https://www.figma.com/api/mcp/asset/6641364c-9da6-487b-88cc-fc5faed6d2a3.png" alt="Avatar">
+            <p class="hello">Bienvenido</p>
+            <h1 id="nombreHotelDashboard">Mi hotel</h1>
         </div>
 
     </header>
@@ -48,12 +44,12 @@
             <div class="legend">
 
                 <div class="legend-item">
-                    <img src="https://www.figma.com/api/mcp/asset/2393aef7-67b5-44d1-a6e8-1fc019cc060d.svg" alt="">
+                    <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="../assets/icons/sprite.svg#punto"></use></svg>
                     <span>12 Ocupadas</span>
                 </div>
 
                 <div class="legend-item">
-                    <img src="https://www.figma.com/api/mcp/asset/95f96895-bdb1-4058-b688-f6146f7c1527.svg" alt="">
+                    <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="../assets/icons/sprite.svg#punto"></use></svg>
                     <span>4 Disponibles</span>
                 </div>
 
@@ -67,7 +63,7 @@
             <div class="card finance-card">
 
                 <div class="finance-title">
-                    <img src="https://www.figma.com/api/mcp/asset/0ad06b5e-f75d-47af-b7f2-b79a3133bed9.svg" alt="">
+                    <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="../assets/icons/sprite.svg#ingreso"></use></svg>
                     <span>Ingresos</span>
                 </div>
 
@@ -79,7 +75,7 @@
             <div class="card finance-card">
 
                 <div class="finance-title">
-                    <img src="https://www.figma.com/api/mcp/asset/85c666ba-e182-4039-bd11-95a570efe8a0.svg" alt="">
+                    <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="../assets/icons/sprite.svg#gasto"></use></svg>
                     <span>Gastos</span>
                 </div>
 
@@ -94,7 +90,7 @@
         <section class="alert">
 
             <div class="info-icon">
-                <img src="https://www.figma.com/api/mcp/asset/6dacb088-f3ff-4f77-8e37-da1ae32e2525.svg" alt="">
+                <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="../assets/icons/sprite.svg#info"></use></svg>
             </div>
 
             <div>
@@ -156,27 +152,27 @@
     <nav class="bottom-nav">
 
         <a class="nav-item active">
-            <img src="https://www.figma.com/api/mcp/asset/d5411f87-e8d2-4227-8583-f85f3ffef545.svg" alt="">
+            <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="../assets/icons/sprite.svg#inicio"></use></svg>
             <span>Inicio</span>
         </a>
 
         <a class="nav-item">
-            <img src="https://www.figma.com/api/mcp/asset/3427ce44-615b-448d-90d1-6896b075d364.svg" alt="">
+            <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="../assets/icons/sprite.svg#habitaciones"></use></svg>
             <span>Habitaciones</span>
         </a>
 
         <a class="nav-item">
-            <img src="https://www.figma.com/api/mcp/asset/7833d7a2-8879-4488-ad68-be7bf8905adc.svg" alt="">
+            <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="../assets/icons/sprite.svg#reservas"></use></svg>
             <span>Reservas</span>
         </a>
 
         <a class="nav-item">
-            <img src="https://www.figma.com/api/mcp/asset/3ab6f618-0b37-49e3-9dd9-21c3d8c195c6.svg" alt="">
+            <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="../assets/icons/sprite.svg#finanzas"></use></svg>
             <span>Finanzas</span>
         </a>
 
         <a class="nav-item">
-            <img src="https://www.figma.com/api/mcp/asset/b52f77b8-6b08-4820-9a55-f39eea5ae073.svg" alt="">
+            <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="../assets/icons/sprite.svg#limpieza"></use></svg>
             <span>Limpieza</span>
         </a>
 

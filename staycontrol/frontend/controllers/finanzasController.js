@@ -1,11 +1,3 @@
-const tabs = document.querySelectorAll(".tab");
+import { iniciarNegocio } from "./negocioController.js";
 
-tabs.forEach(tab => {
-    tab.addEventListener("click", () => {
-        tabs.forEach(item => {
-            item.classList.remove("active");
-        });
-
-        tab.classList.add("active");
-    });
-});
+iniciarNegocio("finanzas");

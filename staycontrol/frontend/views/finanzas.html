@@ -6,20 +6,16 @@
 
     <title>StayControl - Finanzas</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
+    <link rel="preload" href="../assets/fonts/DMSans-Variable.ttf" as="font" type="font/ttf" crossorigin>
 
     <link rel="stylesheet" href="../assets/css/finanzas.css">
+    <link rel="stylesheet" href="../assets/css/negocio.css">
+    <link rel="stylesheet" href="../assets/css/experiencia.css">
 </head>
 
 <body>
 
-<div class="app">
+<div class="app finanzas-app">
 
     <!-- =========================
          HEADER
@@ -31,10 +27,7 @@
 
         <button class="download-btn">
 
-            <img
-                src="https://www.figma.com/api/mcp/asset/afa19d6d-bb53-4f65-848b-b488387e5a21.svg"
-                alt="Descargar"
-            >
+            <svg class="ui-icon" viewBox="0 0 24 24" role="img" aria-label="Descargar" focusable="false"><use href="../assets/icons/sprite.svg#descargar"></use></svg>
 
         </button>
 
@@ -211,10 +204,7 @@
 
                 <div class="transaction-icon income">
 
-                    <img
-                        src="https://www.figma.com/api/mcp/asset/1997cba7-7081-4014-827a-de9e21abcb68.svg"
-                        alt=""
-                    >
+                    <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="../assets/icons/sprite.svg#ingreso"></use></svg>
 
                 </div>
 
@@ -255,10 +245,7 @@
 
                 <div class="transaction-icon expense">
 
-                    <img
-                        src="https://www.figma.com/api/mcp/asset/932b0cf8-ba67-471d-b381-bd77895a9af7.svg"
-                        alt=""
-                    >
+                    <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="../assets/icons/sprite.svg#gasto"></use></svg>
 
                 </div>
 
@@ -299,10 +286,7 @@
 
                 <div class="transaction-icon income">
 
-                    <img
-                        src="https://www.figma.com/api/mcp/asset/1997cba7-7081-4014-827a-de9e21abcb68.svg"
-                        alt=""
-                    >
+                    <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="../assets/icons/sprite.svg#ingreso"></use></svg>
 
                 </div>
 
@@ -343,10 +327,7 @@
 
                 <div class="transaction-icon expense">
 
-                    <img
-                        src="https://www.figma.com/api/mcp/asset/932b0cf8-ba67-471d-b381-bd77895a9af7.svg"
-                        alt=""
-                    >
+                    <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="../assets/icons/sprite.svg#gasto"></use></svg>
 
                 </div>
 
@@ -383,6 +364,29 @@
         </section>
 
     </main>
+
+    <nav class="bottom-nav" aria-label="Navegación principal">
+        <a class="nav-item" href="/dashboard">
+            <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="../assets/icons/sprite.svg#inicio"></use></svg>
+            <span>Inicio</span>
+        </a>
+        <a class="nav-item" href="/habitaciones">
+            <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="../assets/icons/sprite.svg#habitaciones"></use></svg>
+            <span>Habitaciones</span>
+        </a>
+        <a class="nav-item" href="/reservas">
+            <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="../assets/icons/sprite.svg#reservas"></use></svg>
+            <span>Reservas</span>
+        </a>
+        <a class="nav-item active" href="/finanzas" aria-current="page">
+            <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="../assets/icons/sprite.svg#finanzas"></use></svg>
+            <span>Finanzas</span>
+        </a>
+        <a class="nav-item" href="/limpieza">
+            <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="../assets/icons/sprite.svg#limpieza"></use></svg>
+            <span>Limpieza</span>
+        </a>
+    </nav>
 
 </div>
 
