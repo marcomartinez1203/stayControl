@@ -1,6 +1,6 @@
 # StayControl
 
-Aplicación de gestión hotelera con frontend HTML/CSS/JavaScript y backend Java 21
+Aplicación de gestión hotelera con frontend Vue 3 + Vue Router + Vite (PWA) y backend Java 21
 con Spring Boot y MongoDB. El proyecto activo es esta carpeta, no el `pom.xml`
 del directorio superior.
 
@@ -9,8 +9,8 @@ del directorio superior.
 - Registro con nombre del hotel, login, logout y edición del nombre del hotel.
 - Cada cuenta administra su propio hotel con colecciones de negocio aisladas.
 - Habitaciones: búsqueda, estados, edición, baja lógica e historial por habitación.
-- Habitaciones funciona como [SPA de alcance local](docs/habitaciones-spa.md): listado,
-  creación y edición sin recargar. Los demás módulos conservan navegación multipágina.
+- Todas las pantallas usan [Vue 3 y navegación SPA](docs/vue-pwa.md): acceso,
+  registro, dashboard, habitaciones, reservas, limpieza y finanzas sin recargar.
 - Reservas: búsqueda por huésped, calendario, consulta de disponibilidad/cotización,
   creación idempotente, cancelación y finalización.
 - Limpieza: agenda por fecha/estado, tareas vencidas, creación, inicio, finalización
@@ -19,6 +19,7 @@ del directorio superior.
   con motivo, balance, gráfica y descarga JSON.
 - Dashboard: métricas reales de habitaciones, reservas, limpieza y finanzas.
 - Protección de formularios pendientes y reintentos con la misma clave de creación.
+- [PWA instalable](docs/pwa.md), iconos locales y pantalla segura sin conexión.
 
 Se conserva el diseño original y los iconos SVG locales. No se ha añadido Android,
 iOS ni un empaquetador nativo. El frontend necesita servirse por HTTP/HTTPS desde
@@ -28,8 +29,13 @@ Spring Boot; no funciona abriendo directamente el HTML como archivo.
 
 ```text
 frontend/
-  views/          Pantallas
-  controllers/    Interacción, formularios, navegación y renderizado
+  src/views/      Pantallas Vue (acceso, dashboard, listados y formularios)
+  src/components/ Iconos, selector de habitaciones y controles PWA
+  src/router.js   Rutas SPA y protección de sesión
+  src/lifecycle.js Borradores, bloqueo de envíos y cancelación de lecturas
+  dist/           Resultado generado por npm run build (no editar)
+  views/          HTML anterior conservado como referencia; ya no se sirve
+  controllers/    Código anterior; solo pwaController se usa en la pantalla offline
   services/       Cliente HTTP, sesión, CSRF y APIs
   assets/         CSS e iconos
   models/         Modelos anteriores; no sustituyen los datos del servidor
@@ -52,9 +58,13 @@ docs/             Contratos y límites de la implementación
 2. Para MongoDB local, configura primero [el replica set local](docs/mongodb-local.md).
    Si utilizas Atlas, comprueba los permisos del usuario y la IP autorizada.
    Reservas y limpieza requieren un replica set compatible con transacciones.
-3. Desde esta carpeta:
+3. Compila Vue e inicia Spring desde esta carpeta (Node 22.12+ o Node 24):
 
 ```powershell
+Push-Location frontend
+npm ci
+npm run build
+Pop-Location
 .\mvnw.cmd spring-boot:run
 ```
 
@@ -63,7 +73,9 @@ Los nuevos usuarios no necesitan ser elevados a ADMIN para gestionar su hotel.
 No hay credenciales predeterminadas. El aprovisionamiento `AUTH_BOOTSTRAP_*`
 es opcional para instalaciones administradas, no un requisito del registro.
 
-También puedes iniciar `StaycontrolApplication` con Spring Boot Dashboard.
+También puedes iniciar `StaycontrolApplication` con Spring Boot Dashboard después
+de compilar Vue. Entrada directa: `http://localhost:8080/index.html#/login`.
+Para editar con recarga rápida, consulta [desarrollo Vue](docs/vue-pwa.md).
 
 ## Datos de la versión anterior
 
@@ -78,13 +90,19 @@ cuenta tiene un hotel independiente. Aún no hay invitaciones de empleados.
 ## Compilar y empaquetar sin ejecutar pruebas
 
 ```powershell
+Push-Location frontend
+npm run build
+Pop-Location
 .\mvnw.cmd -B -o package '-Dmaven.test.skip=true'
 java -jar target/staycontrol-0.0.1-SNAPSHOT.jar
 ```
 
 `-o` usa las dependencias ya descargadas. En una instalación nueva, quítalo.
 Maven incluye el frontend dentro del JAR. Durante desarrollo, Spring también
-lee `frontend/` desde el directorio de ejecución; no edites las copias en `target/`.
+lee `frontend/dist/` desde el directorio de ejecución; no edites las copias en `target/`.
+Ejecuta `npm run build` después de modificar componentes y antes de empaquetar.
+En una compilación de publicación usa `clean package` para no incluir recursos
+generados de versiones anteriores.
 
 ## Vistas y APIs
 
@@ -112,7 +130,8 @@ Consulta [integración del frontend](docs/frontend-integracion.md) y los documen
 - Las sesiones se pierden al reiniciar. El limitador de login es local por instancia.
 - El servidor escucha en `127.0.0.1` por defecto. Para publicar hacen falta hosting,
   HTTPS, cookies Secure, control de red y copias de seguridad. No habilites CORS abierto.
-- El empaquetado híbrido se definirá por separado, sin asumir plataforma nativa.
+- La PWA se instala desde navegadores compatibles; no incluye APK ni publicación en tiendas.
+- El modo sin conexión muestra una pantalla informativa: no guarda datos del hotel ni encola operaciones.
 
 No confundir compilación o rutas HTTP correctas con validación integral: no se
 han ejecutado pruebas automatizadas ni escrituras de prueba en Atlas en esta etapa.

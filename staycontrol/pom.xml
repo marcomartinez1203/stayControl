@@ -65,16 +65,9 @@
 				<filtering>false</filtering>
 			</resource>
 			<resource>
-				<directory>frontend</directory>
+				<directory>frontend/dist</directory>
 				<targetPath>static</targetPath>
 				<filtering>false</filtering>
-				<includes>
-					<include>views/**/*.html</include>
-					<include>controllers/**/*.js</include>
-					<include>models/**/*.js</include>
-					<include>services/**/*.js</include>
-					<include>assets/**</include>
-				</includes>
 			</resource>
 		</resources>
 		<plugins>

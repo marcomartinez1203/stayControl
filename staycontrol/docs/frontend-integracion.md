@@ -1,5 +1,11 @@
 # Integración frontend y backend
 
+> El frontend activo fue migrado a Vue 3. Consulta [Vue/PWA](vue-pwa.md) para las
+> rutas y componentes actuales. Este documento conserva detalles de la integración
+> anterior: los HTML y controladores indicados abajo ya no son la interfaz activa.
+> El selector Vue usa número/tipo, no un campo de ID manual; los permisos y la
+> disponibilidad definitivos siguen validándose en el backend.
+
 Abrir las rutas desde Spring Boot en `http://localhost:8080`, no como archivos locales.
 
 - Login: correo y contraseña reales, mensajes de error y envío con Enter. No hay credenciales precargadas.
