@@ -1,5 +1,23 @@
 # SPA de Habitaciones
 
+> **⚠️ Documento histórico — Etapa MPA / Vanilla JS**
+>
+> Este documento describe la navegación SPA que se implementó **solo** para el
+> módulo Habitaciones cuando el resto del frontend todavía era multipágina con
+> HTML estático servido por Spring Boot y controladores Vanilla JS en
+> `frontend/controllers/`.
+>
+> **Arquitectura actual (Vue 3 + PWA)**
+>
+> El frontend se migró por completo a **Vue 3** con un único punto de entrada
+> (`frontend/index.html`) y un router con **Hash History**
+> (`frontend/src/router.js`). Los módulos se encuentran en `frontend/src/` y
+> se construyen con Vite (`vite.config.js`). La aplicación es además una **PWA**
+> instalable mediante `manifest.json`, un Service Worker (`sw.js`) con caché de
+> App Shell y la vista `offline.html` como respaldo, gestionados desde
+> `PwaControls.vue`. Los ficheros HTML antiguos de `frontend/views/` ahora
+> solo redirigen al hash correspondiente del router Vue.
+
 Solo el módulo Habitaciones usa navegación SPA. El resto de las vistas sigue
 siendo multipágina; ir a Reservas, Finanzas, Limpieza o Dashboard carga otro HTML.
 No se añadió un framework ni se cambiaron las APIs, permisos o datos de MongoDB.
